@@ -1,16 +1,11 @@
 import type { APIRoute } from "astro";
-import { getStore } from "@netlify/blobs";
+import { getStore } from "~/utils/blob-store";
 
 export const prerender = false;
 
 // Helper function to get gallery data
 async function getGalleryData(slug: string) {
-  const store = getStore({
-    name: 'galleries',
-    siteID: import.meta.env.NETLIFY_SITE_ID,
-    token: import.meta.env.NETLIFY_BLOBS_TOKEN,
-  });
-
+  const store = getStore('galleries');
   const key = `gallery/${slug}`;
   const data = await store.get(key, { type: 'json' });
   return data;
@@ -18,12 +13,7 @@ async function getGalleryData(slug: string) {
 
 // Helper function to save gallery data
 async function saveGalleryData(slug: string, data: any) {
-  const store = getStore({
-    name: 'galleries',
-    siteID: import.meta.env.NETLIFY_SITE_ID,
-    token: import.meta.env.NETLIFY_BLOBS_TOKEN,
-  });
-
+  const store = getStore('galleries');
   const key = `gallery/${slug}`;
   await store.set(key, JSON.stringify(data));
 }
@@ -219,13 +209,8 @@ export const DELETE: APIRoute = async ({ request }) => {
       });
     }
 
-    const store = getStore({
-      name: 'galleries',
-      siteID: import.meta.env.NETLIFY_SITE_ID,
-      token: import.meta.env.NETLIFY_BLOBS_TOKEN,
-    });
-
-    const key = `gallery-${slug}`;
+    const store = getStore('galleries');
+    const key = `gallery/${slug}`;
     await store.delete(key);
 
     return new Response(JSON.stringify({ success: true }), {

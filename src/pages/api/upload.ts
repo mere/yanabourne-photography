@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getStore } from "@netlify/blobs";
+import { getStore } from "~/utils/blob-store";
 
 export const prerender = false;
 
@@ -37,12 +37,8 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Initialize Netlify Blobs client
-    const store = getStore({
-      name: 'file-uploads',
-      siteID: import.meta.env.NETLIFY_SITE_ID,
-      token: import.meta.env.NETLIFY_BLOBS_TOKEN,
-    });
+    // Initialize blob store
+    const store = getStore('file-uploads');
 
     // Generate a unique filename
     const timestamp = Date.now();

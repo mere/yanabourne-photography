@@ -3,17 +3,11 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Header from '../react/Header';
 import Tiles from "../components/Tiles.astro";
-import { getStore } from "@netlify/blobs";
+import { getStore } from "~/utils/blob-store";
 
-const store = getStore({
-      name: "galleries",
-      siteID: import.meta.env.NETLIFY_SITE_ID,
-      token: import.meta.env.NETLIFY_BLOBS_TOKEN,
-    });
-    
+const store = getStore('galleries');
 const key = `gallery/home`;
 const gallery = await store.get(key, { type: 'json' });
-
 
 ---
 

@@ -1,20 +1,16 @@
 ---
-import { getStore } from "@netlify/blobs";
+
 import Layout from "../../layouts/Layout.astro";
 import Header from "~/react/Header";
 import Hero from "~/components/Hero.astro";
-import Gallery from "~/components/Gallery.astro";
 import Tiles from "~/components/Tiles.astro";
+import { getStore } from "~/utils/blob-store";
 
 export const prerender = false;
 
 const { slug } = Astro.params;
 
-const store = getStore({
-      name: "galleries",
-      siteID: import.meta.env.NETLIFY_SITE_ID,
-      token: import.meta.env.NETLIFY_BLOBS_TOKEN,
-    });
+const store = getStore("galleries");
     
 const key = `gallery/${slug}`;
 const gallery = await store.get(key, { type: 'json' });

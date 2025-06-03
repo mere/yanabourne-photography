@@ -6,6 +6,7 @@ interface Props {
   imageAlt?: string;
   text?: string;
   className?: string;
+  link?: string;
   onClick?: (e: React.MouseEvent) => void;
 }
 
