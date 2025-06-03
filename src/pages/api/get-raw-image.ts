@@ -19,7 +19,11 @@ export const GET: APIRoute = async ({ request }) => {
     const store = getStore('file-uploads');
 
     // Get the blob
-    const blob = await store.get(key);
+    const blob = await store.getWithMetadata(key, {
+        type: "stream",
+      });
+
+    
     
     if (!blob) {
       return new Response(JSON.stringify({ error: 'Image not found' }), {
@@ -28,11 +32,12 @@ export const GET: APIRoute = async ({ request }) => {
       });
     }
 
+    console.log(blob.metadata);
     // Return the image data with appropriate content type
-    return new Response(blob, {
+    return new Response(blob.data, {
       status: 200,
       headers: {
-        'Content-Type': 'application/octet-stream',
+        'Content-Type': String(blob.metadata.type),
         'Cache-Control': 'public, max-age=31536000'
       }
     });

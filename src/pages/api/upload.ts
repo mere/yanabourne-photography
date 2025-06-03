@@ -54,7 +54,14 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     // Store the file
-    await store.set(key, file);
+    await store.set(key, file, {
+      metadata: {
+        slug,
+        name: file.name,
+        type: file.type,
+        size: file.size
+      }
+    });
 
     // Get the URL for the uploaded file
     // const url = await store.get(key, { type: 'blob' });
