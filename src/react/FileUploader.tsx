@@ -6,9 +6,10 @@ interface Props {
   onSave: (imageUrl: string) => void;
   onDelete: () => void;
   hasImage: boolean;
+  slug: string;
 }
 
-export default function FileUploader({ isOpen, onClose, onSave, onDelete, hasImage }: Props) {
+export default function FileUploader({ isOpen, onClose, onSave, onDelete, hasImage, slug }: Props) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,10 +41,22 @@ export default function FileUploader({ isOpen, onClose, onSave, onDelete, hasIma
         return;
       }
 
+      // Get admin secret from cookie
+      const cookies = document.cookie.split(';');
+      const adminSecretCookie = cookies.find(cookie => cookie.trim().startsWith('admin_secret='));
+      const secret = adminSecretCookie ? adminSecretCookie.split('=')[1] : '';
+
+      if (!secret) {
+        throw new Error('Admin secret not found');
+      }
+
       // Create form data
       const formData = new FormData();
       formData.append('file', selectedFile);
+      formData.append('slug', slug);
 
+      console.log("Form data:", formData);
+      console.log("slug:", slug);
       // Upload file using the Astro endpoint
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -56,6 +69,7 @@ export default function FileUploader({ isOpen, onClose, onSave, onDelete, hasIma
       }
 
       const { url } = await response.json();
+      
       onSave(url);
       onClose();
     } catch (err) {

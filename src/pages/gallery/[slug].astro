@@ -1,28 +1,36 @@
 ---
-import { api } from "../../../convex/_generated/api";
-import convex from "../../lib/convex";
+import { getStore } from "@netlify/blobs";
 import Layout from "../../layouts/Layout.astro";
-import Tiles from "../../components/Tiles.astro";
-import Hero from "~/components/Hero.astro";
 import Header from "~/react/Header";
-import type { Doc } from 'convex/_generated/dataModel';
+import Hero from "~/components/Hero.astro";
+import Gallery from "~/components/Gallery.astro";
+import Tiles from "~/components/Tiles.astro";
 
+const { slug } = Astro.params;
 
-export async function getStaticPaths() {
-  const galleries = await convex.query(api.galleries.list, {}) as Doc<'galleries'>[];
-  
-  return galleries.map((gallery) => ({
-    params: { slug: gallery.slug },
-    props: { gallery },
-  }));
-}
+const store = getStore({
+      name: "galleries",
+      siteID: import.meta.env.NETLIFY_SITE_ID,
+      token: import.meta.env.NETLIFY_BLOBS_TOKEN,
+    });
+    
+const key = `gallery/${slug}`;
+const gallery = await store.get(key, { type: 'json' });
 
-const { gallery } = Astro.props;
+console.log(gallery);
 ---
 
-  <Layout title={gallery.title} id={gallery.slug}>
-    <Header client:load />
-    <Hero title={gallery.title} />
-    <Tiles gallery={gallery} />
-  </Layout>
+{gallery ? (
+<Layout title={gallery.title} id={gallery.slug}>
+  <Header client:load />
+  <Hero title={gallery.title} />
+  <Tiles gallery={gallery} />
+</Layout>
+) : (
+<Layout title={'Yana Bourne Photography'} id={'home'}>
+  <Header client:load />
+  <Hero title={'Yana Bourne Photography'} />
+  <div>Gallery not found</div>
   
+</Layout>
+)}

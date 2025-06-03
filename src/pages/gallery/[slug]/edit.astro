@@ -2,25 +2,24 @@
 import Layout from '../../../layouts/Layout.astro';
 import GalleryEditor from '../../../react/GalleryEditor';
 import Header from '../../../react/Header';
-import convex from '~/lib/convex';
-import { api } from '../../../../convex/_generated/api';
-import type { Doc } from 'convex/_generated/dataModel';
+import { getStore } from '@netlify/blobs';
 
-
-export async function getStaticPaths() {
-  const galleries = await convex.query(api.galleries.list, {}) as Doc<'galleries'>[];
-  
-  return galleries.map((gallery) => ({
-    params: { slug: gallery.slug },
-    props: { gallery },
-  }));
-}
+export const prerender = false;
 
 const { slug } = Astro.params;
 
+const store = getStore({
+      name: "galleries",
+      siteID: import.meta.env.NETLIFY_SITE_ID,
+      token: import.meta.env.NETLIFY_BLOBS_TOKEN,
+    });
+    
+const key = `gallery/${slug}`;
+const gallery = await store.get(key, { type: 'json' });
+
 ---
 
-<Layout title="Edit Gallery">
+<Layout title="Edit Gallery" id={slug}>
   <Header client:load />
-  <GalleryEditor client:load slug={slug} />
+  <GalleryEditor client:only="react" gallery={gallery} slug={slug} />
 </Layout> 

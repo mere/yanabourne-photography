@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { useQuery } from 'convex/react';
-import { api } from '../../convex/_generated/api';
 
 interface Props {
   children: ReactNode;
@@ -9,17 +7,10 @@ interface Props {
 
 export default function Auth({ children }: Props) {
   const [inputSecret, setInputSecret] = useState<string>('');
-  const [querySecret, setQuerySecret] = useState<string>('');
   const [isChecking, setIsChecking] = useState(true);
   const [hasAttemptedLogin, setHasAttemptedLogin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
-  // Only run the query if we have a secret to check
-  const isAdmin = useQuery(
-    api.auth.isAdmin,
-    querySecret ? { secret: querySecret } : 'skip'
-  );
-
   // Initial cookie check
   useEffect(() => {
     console.log('Checking cookies...');
@@ -29,43 +20,50 @@ export default function Auth({ children }: Props) {
       const storedSecret = adminSecretCookie.split('=')[1];
       console.log('Found stored secret in cookies');
       setInputSecret(storedSecret);
-      setQuerySecret(storedSecret);
+      checkAuth(storedSecret);
     } else {
       console.log('No stored secret found in cookies');
       setIsChecking(false);
     }
   }, []);
 
-  // Handle authentication result
-  useEffect(() => {
-    if (isAdmin === undefined) return; // Still loading
+  const checkAuth = async (secret: string) => {
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ secret }),
+      });
 
-    if (isAdmin === true) {
-      console.log('Admin authenticated, setting cookie');
-      document.cookie = `admin_secret=${querySecret}; path=/; max-age=2592000`; // 30 days
-      setIsChecking(false);
-      setQuerySecret(''); // Clear query secret to prevent repeated calls
-      setIsAuthenticated(true);
-    } else if (isAdmin === false) {
-      console.log('Admin authentication failed');
+      if (response.ok) {
+        console.log('Admin authenticated, setting cookie');
+        document.cookie = `admin_secret=${secret}; path=/; max-age=2592000`; // 30 days
+        setIsChecking(false);
+        setIsAuthenticated(true);
+      } else {
+        console.log('Admin authentication failed');
+        setIsChecking(false);
+        setHasAttemptedLogin(true);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
       setIsChecking(false);
       setHasAttemptedLogin(true);
-      setQuerySecret(''); // Clear query secret after failed attempt
       setIsAuthenticated(false);
     }
-  }, [isAdmin, querySecret]);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Login form submitted');
-    setQuerySecret(inputSecret);
+    checkAuth(inputSecret);
     setHasAttemptedLogin(false);
   };
 
-  // Show loading spinner only when we're checking cookies or when we have a pending query
-  const isLoading = isChecking || (querySecret !== '' && isAdmin === undefined);
-
-  if (isLoading) {
+  if (isChecking) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

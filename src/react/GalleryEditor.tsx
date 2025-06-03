@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react';
 import GridLayout from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { useQuery, useMutation, ConvexProvider, ConvexReactClient } from 'convex/react';
-import { api } from '../../convex/_generated/api';
 import Tile from './Tile';
 import Toast from './Toast';
 import TextEditor from './TextEditor';
 import LinkEditor from './LinkEditor';
 import FileUploader from './FileUploader';
 import Auth from './Auth';
+import type { Gallery, GalleryTile } from '../types/gallery';
 
 interface Props {
   slug: string;
+  gallery: Gallery | null;
 }
 
 interface CreateGalleryModalProps {
@@ -97,17 +97,13 @@ function CreateGalleryModal({ isOpen, onClose, onCreate }: CreateGalleryModalPro
   );
 }
 
-export function GalleryEditorContent({ slug }: Props) {
-  const gallery = useQuery(api.galleries.getBySlug, { slug });
-  const updateGallery = useMutation(api.galleries.update);
-  const createGallery = useMutation(api.galleries.create);
-  const deleteGallery = useMutation(api.galleries.delete);
+export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
+  const [gallery, setGallery] = useState<Gallery | null>(initialGallery);
   const [layout, setLayout] = useState<GridLayout.Layout[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [containerWidth, setContainerWidth] = useState(1200);
   const [rowHeight, setRowHeight] = useState(60);
-  const [pendingLayout, setPendingLayout] = useState<GridLayout.Layout[]>([]);
   const [selectedTileIndex, setSelectedTileIndex] = useState<number | null>(null);
   const [isTextEditorOpen, setIsTextEditorOpen] = useState(false);
   const [isLinkEditorOpen, setIsLinkEditorOpen] = useState(false);
@@ -118,25 +114,27 @@ export function GalleryEditorContent({ slug }: Props) {
 
   const isHomeGallery = slug === 'home';
 
+  // Initialize layout from gallery data
   useEffect(() => {
-    if (!gallery) return;
-
-    // Convert gallery layout to react-grid-layout format
-    const newLayout = gallery.layout.map(tile => ({
-      i: tile.id,
-      x: tile.x,
-      y: tile.y,
-      w: tile.w,
-      h: tile.h,
-      minW: 1,
-      maxW: 12,
-      minH: 1,
-      maxH: 20,
-    }));
-    setLayout(newLayout);
-    setPendingLayout(newLayout);
+    if (gallery) {
+      // Convert gallery layout to react-grid-layout format
+      const newLayout = gallery.layout.map((tile: GalleryTile) => ({
+        i: tile.id,
+        x: tile.x,
+        y: tile.y,
+        w: tile.w,
+        h: tile.h,
+        minW: 1,
+        maxW: 12,
+        minH: 1,
+        maxH: 20,
+      }));
+      setLayout(newLayout);
+    }
+    console.log('gallery', gallery);
   }, [gallery]);
 
+  
   // Update container width and row height on window resize
   useEffect(() => {
     const updateWidth = () => {
@@ -155,7 +153,7 @@ export function GalleryEditorContent({ slug }: Props) {
   const handleLayoutChange = (newLayout: GridLayout.Layout[]) => {
     if (!gallery) return;
     setHasChanges(true);
-    setPendingLayout(newLayout);
+    setLayout(newLayout);
   };
 
   const handleDragStart = () => {
@@ -195,14 +193,15 @@ export function GalleryEditorContent({ slug }: Props) {
     if (!gallery) return;
 
     // Find the lowest y position in the current layout
-    const maxY = Math.max(...pendingLayout.map(item => item.y + item.h), 0);
+    const maxY = Math.max(...layout.map(item => item.y + item.h), 0);
     
     // Create a new tile at the bottom
-    const newTile = {
+    const newTile: GalleryTile = {
       id: `tile-${Date.now()}`,
       imageUrl: '', // Start with no image
       altText: '',
       description: '',
+      link: '',
       x: 0,
       y: maxY,
       w: 4,
@@ -212,23 +211,33 @@ export function GalleryEditorContent({ slug }: Props) {
     if (isHomeGallery) {
       // For home gallery, create a new gallery for this tile
       try {
-        const newGallery = await createGallery({
-          title: 'New Gallery',
-          slug: `gallery-${Date.now()}`,
-          layout: []
+        const response = await fetch('/api/gallery', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: 'New Gallery',
+            slug: `gallery-${Date.now()}`,
+            layout: []
+          }),
         });
+
+        if (!response.ok) {
+          throw new Error('Failed to create new gallery');
+        }
+
+        const newGallery = await response.json();
         
-        // Add the link to the new gallery
-        newTile.link = `/gallery/${newGallery.slug}`;
       } catch (error) {
-        setToast({ message: 'Failed to create new gallery', type: 'error' });
+        setToast({ message: 'Failed to create new tile', type: 'error' });
         return;
       }
     }
 
-    // Add to pending layout
+    // Add to layout
     const newLayout = [
-      ...pendingLayout,
+      ...layout,
       {
         i: newTile.id,
         x: newTile.x,
@@ -242,9 +251,8 @@ export function GalleryEditorContent({ slug }: Props) {
       }
     ];
 
-    // Update both layouts
+    // Update layout
     setLayout(newLayout);
-    setPendingLayout(newLayout);
     
     // Update gallery layout
     const updatedGalleryLayout = [...gallery.layout, newTile];
@@ -257,7 +265,7 @@ export function GalleryEditorContent({ slug }: Props) {
     if (!gallery) return;
     
     try {
-      const updatedLayout = pendingLayout.map(item => {
+      const updatedLayout = layout.map(item => {
         const originalTile = gallery.layout.find(t => t.id === item.i);
         if (!originalTile) return null;
 
@@ -268,14 +276,25 @@ export function GalleryEditorContent({ slug }: Props) {
           w: item.w,
           h: item.h,
         };
-      }).filter((tile): tile is NonNullable<typeof tile> => tile !== null);
+      }).filter((tile): tile is GalleryTile => tile !== null);
 
-      await updateGallery({
-        id: gallery._id,
-        layout: updatedLayout
+      const response = await fetch('/api/gallery', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          slug: gallery.slug,
+          layout: updatedLayout
+        }),
       });
 
-      setLayout(pendingLayout);
+      if (!response.ok) {
+        throw new Error('Failed to save changes');
+      }
+
+      const updatedGallery = await response.json();
+      setGallery(updatedGallery);
       setHasChanges(false);
       setToast({ message: 'Changes saved successfully', type: 'success' });
       
@@ -287,37 +306,17 @@ export function GalleryEditorContent({ slug }: Props) {
   };
 
   const handleCancel = () => {
-    // Reload the gallery data to reset changes
-    if (gallery) {
-      const newLayout = gallery.layout.map(tile => ({
-        i: tile.id,
-        x: tile.x,
-        y: tile.y,
-        w: tile.w,
-        h: tile.h,
-        minW: 1,
-        maxW: 12,
-        minH: 1,
-        maxH: 20,
-      }));
-      setLayout(newLayout);
-      setPendingLayout(newLayout);
-      setHasChanges(false);
-      setSelectedTileIndex(null); // Clear selected tile
-      setToast({ message: 'Changes discarded', type: 'info' });
-      
-      // Navigate back to the current page using window.location
-      window.location.href = `/gallery/${slug}`;
-    }
+    // Simply reload the page to reset all changes
+    window.location.href = `/gallery/${slug}`;
   };
 
   const handleUploadImage = () => {
-    if (!selectedTileIndex) return;
+    if (selectedTileIndex === null) return;
     setIsFileUploaderOpen(true);
   };
 
   const handleSaveImage = (imageUrl: string) => {
-    if (!gallery || !selectedTileIndex) return;
+    if (!gallery || selectedTileIndex === null) return;
     
     const tile = gallery.layout.find(t => t.id === layout[selectedTileIndex].i);
     if (tile) {
@@ -328,7 +327,7 @@ export function GalleryEditorContent({ slug }: Props) {
   };
 
   const handleDeleteImage = () => {
-    if (!gallery || !selectedTileIndex) return;
+    if (!gallery || selectedTileIndex === null) return;
     
     const tile = gallery.layout.find(t => t.id === layout[selectedTileIndex].i);
     if (tile) {
@@ -339,12 +338,12 @@ export function GalleryEditorContent({ slug }: Props) {
   };
 
   const handleEditText = () => {
-    if (!gallery || !selectedTileIndex) return;
+    if (!gallery || selectedTileIndex === null) return;
     setIsTextEditorOpen(true);
   };
 
   const handleSaveText = (newText: string) => {
-    if (!gallery || !selectedTileIndex) return;
+    if (!gallery || selectedTileIndex === null) return;
     
     const tile = gallery.layout.find(t => t.id === layout[selectedTileIndex].i);
     if (tile) {
@@ -355,12 +354,12 @@ export function GalleryEditorContent({ slug }: Props) {
   };
 
   const handleEditLink = () => {
-    if (!gallery || !selectedTileIndex) return;
+    if (!gallery || selectedTileIndex === null) return;
     setIsLinkEditorOpen(true);
   };
 
   const handleSaveLink = (newLink: string) => {
-    if (!gallery || !selectedTileIndex) return;
+    if (!gallery || selectedTileIndex === null) return;
     
     const tile = gallery.layout.find(t => t.id === layout[selectedTileIndex].i);
     if (tile) {
@@ -371,7 +370,7 @@ export function GalleryEditorContent({ slug }: Props) {
   };
 
   const handleDeleteTile = async () => {
-    if (!gallery || !selectedTileIndex) return;
+    if (!gallery || selectedTileIndex === null) return;
     
     const tileToDelete = gallery.layout.find(tile => tile.id === layout[selectedTileIndex].i);
     
@@ -381,7 +380,13 @@ export function GalleryEditorContent({ slug }: Props) {
       if (gallerySlug) {
         try {
           // Delete the associated gallery
-          await deleteGallery({ slug: gallerySlug });
+          const response = await fetch(`/api/gallery?slug=${gallerySlug}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to delete associated gallery');
+          }
         } catch (error) {
           setToast({ message: 'Failed to delete associated gallery', type: 'error' });
           return;
@@ -390,8 +395,7 @@ export function GalleryEditorContent({ slug }: Props) {
     }
     
     // Remove the tile from the layout
-    const updatedLayout = pendingLayout.filter(item => item.i !== layout[selectedTileIndex].i);
-    setPendingLayout(updatedLayout);
+    const updatedLayout = layout.filter(item => item.i !== layout[selectedTileIndex].i);
     setLayout(updatedLayout);
     
     // Update gallery layout
@@ -408,17 +412,29 @@ export function GalleryEditorContent({ slug }: Props) {
 
     try {
       // Create the new gallery
-      const newGallery = await createGallery({
-        title,
-        slug,
-        layout: []
+      const response = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          slug,
+          layout: []
+        }),
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to create gallery');
+      }
+
+      const newGallery = await response.json();
+
       // Find the lowest y position in the current layout
-      const maxY = Math.max(...pendingLayout.map(item => item.y + item.h), 0);
+      const maxY = Math.max(...layout.map(item => item.y + item.h), 0);
       
       // Create a new tile linking to the gallery
-      const newTile = {
+      const newTile: GalleryTile = {
         id: `tile-${Date.now()}`,
         imageUrl: '', // Start with no image
         altText: title,
@@ -430,9 +446,9 @@ export function GalleryEditorContent({ slug }: Props) {
         h: 4,
       };
 
-      // Add to pending layout
+      // Add to layout
       const newLayout = [
-        ...pendingLayout,
+        ...layout,
         {
           i: newTile.id,
           x: newTile.x,
@@ -446,9 +462,8 @@ export function GalleryEditorContent({ slug }: Props) {
         }
       ];
 
-      // Update both layouts
+      // Update layout
       setLayout(newLayout);
-      setPendingLayout(newLayout);
       
       // Update gallery layout
       const updatedGalleryLayout = [...gallery.layout, newTile];
@@ -469,15 +484,15 @@ export function GalleryEditorContent({ slug }: Props) {
     try {
       // Find the lowest y position in the current layout
       // If there are no tiles, start from y=0
-      const maxY = pendingLayout.length > 0 
-        ? Math.max(...pendingLayout.map(item => item.y + item.h), 0)
+      const maxY = layout.length > 0 
+        ? Math.max(...layout.map(item => item.y + item.h), 0)
         : 0;
       let currentY = maxY;
       let currentX = 0;
       const maxWidth = 12; // Maximum width of the grid
 
       // Create a new array to hold all the new tiles
-      const newTiles = [];
+      const newTiles: GalleryTile[] = [];
       let successfulUploads = 0;
 
       setToast({ 
@@ -522,8 +537,8 @@ export function GalleryEditorContent({ slug }: Props) {
         if (currentX + tileWidth > maxWidth) {
           currentX = 0;
           // If there are no tiles in the current row, use the tile height
-          const rowHeight = pendingLayout.length > 0
-            ? Math.max(...pendingLayout.filter(item => item.x === 0).map(item => item.h), 0)
+          const rowHeight = layout.length > 0
+            ? Math.max(...layout.filter(item => item.x === 0).map(item => item.h), 0)
             : tileHeight;
           currentY += rowHeight;
         }
@@ -532,6 +547,7 @@ export function GalleryEditorContent({ slug }: Props) {
           // Create form data
           const formData = new FormData();
           formData.append('file', file);
+          formData.append('slug', gallery.slug);
 
           // Upload file using the Astro endpoint
           const response = await fetch('/api/upload', {
@@ -547,7 +563,7 @@ export function GalleryEditorContent({ slug }: Props) {
           const { url } = await response.json();
 
           // Create new tile
-          const newTile = {
+          const newTile: GalleryTile = {
             id: `tile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             imageUrl: url,
             altText: file.name,
@@ -572,7 +588,7 @@ export function GalleryEditorContent({ slug }: Props) {
 
       // Update layouts with all new tiles at once
       const newLayout = [
-        ...pendingLayout,
+        ...layout,
         ...newTiles.map(tile => ({
           i: tile.id,
           x: tile.x,
@@ -586,9 +602,8 @@ export function GalleryEditorContent({ slug }: Props) {
         }))
       ];
 
-      // Update both layouts
+      // Update layout
       setLayout(newLayout);
-      setPendingLayout(newLayout);
       
       // Update gallery layout
       gallery.layout = [...gallery.layout, ...newTiles];
@@ -612,9 +627,8 @@ export function GalleryEditorContent({ slug }: Props) {
   const handleDeleteAll = () => {
     if (!gallery) return;
     
-    // Clear both layouts
+    // Clear layout
     setLayout([]);
-    setPendingLayout([]);
     
     // Clear gallery layout
     gallery.layout = [];
@@ -624,7 +638,67 @@ export function GalleryEditorContent({ slug }: Props) {
   };
 
   if (!gallery) {
-    return <div>Gallery not found</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Gallery Not Found
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Would you like to create a new gallery with the slug "{slug}"?
+            </p>
+          </div>
+          <form 
+            className="mt-8 space-y-6" 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const response = await fetch('/api/gallery', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    title: slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+                    slug,
+                    layout: []
+                  }),
+                });
+
+                if (!response.ok) {
+                  throw new Error('Failed to create gallery');
+                }
+
+                // Reload the page to show the new gallery
+                window.location.reload();
+              } catch (error) {
+                setToast({ 
+                  message: `Failed to create gallery: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+                  type: 'error' 
+                });
+              }
+            }}
+          >
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => window.location.href = '/'}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Create Gallery
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -811,7 +885,7 @@ export function GalleryEditorContent({ slug }: Props) {
         isOpen={isTextEditorOpen}
         onClose={() => setIsTextEditorOpen(false)}
         onSave={handleSaveText}
-        initialText={gallery?.layout.find(t => t.id === layout[selectedTileIndex]?.i)?.description || ''}
+        initialText={selectedTileIndex !== null ? gallery?.layout.find(t => t.id === layout[selectedTileIndex]?.i)?.description || '' : ''}
       />
 
       {/* Link Editor Modal */}
@@ -819,7 +893,7 @@ export function GalleryEditorContent({ slug }: Props) {
         isOpen={isLinkEditorOpen}
         onClose={() => setIsLinkEditorOpen(false)}
         onSave={handleSaveLink}
-        initialLink={gallery?.layout.find(t => t.id === layout[selectedTileIndex]?.i)?.link || ''}
+        initialLink={selectedTileIndex !== null ? gallery?.layout.find(t => t.id === layout[selectedTileIndex]?.i)?.link || '' : ''}
       />
 
       {/* File Uploader Modal */}
@@ -828,7 +902,8 @@ export function GalleryEditorContent({ slug }: Props) {
         onClose={() => setIsFileUploaderOpen(false)}
         onSave={handleSaveImage}
         onDelete={handleDeleteImage}
-        hasImage={gallery?.layout.find(t => t.id === layout[selectedTileIndex]?.i)?.imageUrl !== ''}
+        hasImage={selectedTileIndex !== null ? gallery?.layout.find(t => t.id === layout[selectedTileIndex]?.i)?.imageUrl !== '' : false}
+        slug={slug}
       />
 
       {/* Create Gallery Modal */}
@@ -842,13 +917,9 @@ export function GalleryEditorContent({ slug }: Props) {
 }
 
 export default function GalleryEditor(props: Props) {
-  const convex = new ConvexReactClient(import.meta.env.PUBLIC_CONVEX_URL);
-  
   return (
-    <ConvexProvider client={convex}>
-      <Auth>
-        <GalleryEditorContent slug={props.slug} />
-      </Auth>
-    </ConvexProvider>
+    <Auth>
+      <GalleryEditorContent {...props} />
+    </Auth>
   );
 } 
