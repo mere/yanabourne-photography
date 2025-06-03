@@ -4,15 +4,12 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { useQuery, useMutation, ConvexProvider, ConvexReactClient } from 'convex/react';
 import { api } from '../../convex/_generated/api';
-import type { Id } from '../../convex/_generated/dataModel';
-import type { Gallery } from '../types/gallery';
 import Tile from './Tile';
 import Toast from './Toast';
 import TextEditor from './TextEditor';
 import LinkEditor from './LinkEditor';
 import FileUploader from './FileUploader';
 import Auth from './Auth';
-import { uploadFile } from '../lib/netlify-blobs';
 
 interface Props {
   slug: string;
@@ -532,13 +529,27 @@ export function GalleryEditorContent({ slug }: Props) {
         }
 
         try {
-          // Upload file to Netlify Blobs
-          const imageUrl = await uploadFile(file);
+          // Create form data
+          const formData = new FormData();
+          formData.append('file', file);
+
+          // Upload file using the Astro endpoint
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Upload failed');
+          }
+
+          const { url } = await response.json();
 
           // Create new tile
           const newTile = {
             id: `tile-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            imageUrl,
+            imageUrl: url,
             altText: file.name,
             description: '',
             x: currentX,

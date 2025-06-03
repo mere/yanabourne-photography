@@ -9,7 +9,6 @@ import type { Doc } from 'convex/_generated/dataModel';
 
 const gallery = await convex.query(api.galleries.getBySlug, { slug: 'home' }) as Doc<'galleries'>;
 
-console.log(gallery);
 ---
 
 

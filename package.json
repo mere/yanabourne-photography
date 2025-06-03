@@ -12,6 +12,7 @@
     "@astrojs/mdx": "^4.3.0",
     "@astrojs/react": "^4.3.0",
     "@netlify/blobs": "^8.2.0",
+    "@netlify/edge-functions": "^2.14.1",
     "@tailwindcss/vite": "^4.1.8",
     "@types/gridstack": "^0.5.0",
     "@types/react": "^19.1.6",

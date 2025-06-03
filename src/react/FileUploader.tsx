@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { uploadFile } from '../lib/netlify-blobs';
 
 interface Props {
   isOpen: boolean;
@@ -41,9 +40,23 @@ export default function FileUploader({ isOpen, onClose, onSave, onDelete, hasIma
         return;
       }
 
-      // Upload file to Netlify Blobs
-      const imageUrl = await uploadFile(selectedFile);
-      onSave(imageUrl);
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      // Upload file using the Astro endpoint
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      const { url } = await response.json();
+      onSave(url);
       onClose();
     } catch (err) {
       console.error('Upload error:', err);
