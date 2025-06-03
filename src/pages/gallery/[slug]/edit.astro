@@ -1,0 +1,26 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import GalleryEditor from '../../../react/GalleryEditor';
+import Header from '../../../react/Header';
+import convex from '~/lib/convex';
+import { api } from '../../../../convex/_generated/api';
+import type { Doc } from 'convex/_generated/dataModel';
+
+
+export async function getStaticPaths() {
+  const galleries = await convex.query(api.galleries.list, {}) as Doc<'galleries'>[];
+  
+  return galleries.map((gallery) => ({
+    params: { slug: gallery.slug },
+    props: { gallery },
+  }));
+}
+
+const { slug } = Astro.params;
+
+---
+
+<Layout title="Edit Gallery">
+  <Header client:load />
+  <GalleryEditor client:load slug={slug} />
+</Layout> 

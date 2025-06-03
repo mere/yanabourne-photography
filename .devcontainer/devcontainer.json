@@ -1,0 +1,21 @@
+{
+  "name": "Web Development",
+  "dockerFile": "Dockerfile",
+  "forwardPorts": [3000, 4321],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js",
+      "onAutoForward": "notify"
+    }
+  },
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "extensions": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss"
+  ],
+  "postCreateCommand": "npm install",
+  "remoteUser": "node"
+}

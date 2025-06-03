@@ -1,0 +1,28 @@
+---
+import { api } from "../../../convex/_generated/api";
+import convex from "../../lib/convex";
+import Layout from "../../layouts/Layout.astro";
+import Tiles from "../../components/Tiles.astro";
+import Hero from "~/components/Hero.astro";
+import Header from "~/react/Header";
+import type { Doc } from 'convex/_generated/dataModel';
+
+
+export async function getStaticPaths() {
+  const galleries = await convex.query(api.galleries.list, {}) as Doc<'galleries'>[];
+  
+  return galleries.map((gallery) => ({
+    params: { slug: gallery.slug },
+    props: { gallery },
+  }));
+}
+
+const { gallery } = Astro.props;
+---
+
+  <Layout title={gallery.title} id={gallery.slug}>
+    <Header client:load />
+    <Hero title={gallery.title} />
+    <Tiles gallery={gallery} />
+  </Layout>
+  

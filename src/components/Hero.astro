@@ -1,0 +1,30 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  title: string;
+  backgroundImage?: string;
+  class?: string;
+}
+
+const { title, image, class: className = "" } = Astro.props;
+---
+
+<section 
+  class={`relative w-full ml-[80px] md:ml-0 flex items-center justify-center h-[200px] ${className}`}
+>
+<!-- {image && <Image
+  src={image}
+  alt={title}
+  widths={[720, 1080, 1440]}
+  quality="high"
+  format="webp"
+  inferSize={true}
+  loading="lazy"
+  sizes="(max-width: 720px) 720px, (max-width: 1080px) 1080px, 1440px"
+  class="absolute top-0 left-0 w-full h-full object-cover"
+/> } -->
+  <h1 class="text-lg mb-4 md:text-xl max-w-md text-black text-center whitespace-pre-line font-karla font-light">
+    {title.toUpperCase()}
+  </h1>
+</section>

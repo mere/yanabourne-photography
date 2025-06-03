@@ -1,0 +1,80 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Font Styling Rules
+
+Rules for using fonts in Tailwind 4 with Next.js
+
+## Next.js Font Setup
+
+How to set up a Google Font in Next.js
+
+```tsx
+import { FontName } from "next/font/google";
+
+const fontName = FontName({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-fontname",
+});
+```
+
+Example:
+
+```tsx
+import { Bebas_Neue } from "next/font/google";
+
+const bebasNeue = Bebas_Neue({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bebas-neue",
+});
+```
+
+## Tailwind 4 Font Variable
+
+How to define a font variable in Tailwind 4 theme
+
+```css
+@theme inline {
+  --font-fontname: var(--font-fontname);
+}
+```
+
+Example:
+
+```css
+@theme inline {
+  --font-bebas-neue: var(--font-bebas-neue);
+}
+```
+
+## Using Font in Component
+
+How to apply a font in a component using Tailwind 4
+
+```tsx
+className = "[font-family:var(--font-fontname)]";
+```
+
+Example:
+
+```tsx
+className = "text-4xl [font-family:var(--font-bebas-neue)]";
+```
+
+## Font Variable in Layout
+
+How to add font variable to the root layout
+
+```tsx
+className={`${fontName.variable}`}
+```
+
+Example:
+
+```tsx
+className={`${bebasNeue.variable}`}
+```

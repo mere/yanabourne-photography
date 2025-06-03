@@ -1,0 +1,92 @@
+---
+import Tile from './Tile.astro';
+import convex from '../lib/convex';
+import { api } from '../../convex/_generated/api';
+import type { Doc } from 'convex/_generated/dataModel';
+
+interface Props {
+  gallery: Doc<'galleries'>;
+}
+
+const { gallery } = Astro.props;
+
+console.log(gallery);
+
+---
+
+<div class="tiles-container">
+  <!-- <h1 class="gallery-title">{gallery.title}</h1> -->
+  <!-- {gallery.description && <p class="gallery-description">{gallery.description}</p>} -->
+  <div class="tiles-grid">
+    {
+      gallery.layout.map((tile) => (
+        <div
+          class="tile-wrapper"
+          style={`
+            grid-column: ${tile.x + 1} / span ${tile.w};
+            grid-row: ${tile.y + 1} / span ${tile.h};
+          `}
+        >
+          <Tile
+            image={tile.imageUrl}
+            imageAlt={tile.altText || ''}
+            text={tile.description}
+            link={tile.link}
+          />
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  @reference "tailwindcss";
+
+  .tiles-container {
+    @apply w-full px-4 min-h-screen ;
+  }
+
+  .gallery-title {
+    @apply text-3xl font-bold mb-2;
+  }
+
+  .gallery-description {
+    @apply text-gray-600 mb-8;
+  }
+
+  .tiles-grid {
+    @apply grid;
+    grid-template-columns: repeat(12, calc((100vw - 32px) / 12));
+    grid-auto-rows: calc((100vw - 32px) / 12);
+  }
+
+  .tile-wrapper {
+    @apply w-full h-full p-1 md:p-2 relative overflow-hidden;
+  }
+
+  .tile-wrapper > :global(*) {
+    @apply w-full h-full;
+  }
+</style>
+
+
+<script>
+  // Define the Intersection Observer
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const tile = entry.target as HTMLElement;
+        tile.classList.add('animate');
+        observer.unobserve(tile);
+      }
+    });
+  }, {
+    rootMargin: '0px',
+    threshold: 0
+  });
+  
+  // Observe all tiles
+  document.querySelectorAll('.tile-wrapper').forEach(target => {
+    observer.observe(target);
+  });
+</script> 

@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Header from '../react/Header';
+import convex from '../lib/convex';
+import { api } from "../../convex/_generated/api";
+import Tiles from "../components/Tiles.astro";
+import type { Doc } from 'convex/_generated/dataModel';
+
+const gallery = await convex.query(api.galleries.getBySlug, { slug: 'home' }) as Doc<'galleries'>;
+
+console.log(gallery);
+---
+
+
+<Layout title={gallery.title} id={gallery.slug}>
+  <Header client:load />
+  <Hero title={gallery.title} />
+  <Tiles gallery={gallery} />
+</Layout>
