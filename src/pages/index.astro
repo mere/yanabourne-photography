@@ -5,6 +5,8 @@ import Header from '../react/Header';
 import Tiles from "../components/Tiles.astro";
 import { getStore } from "~/utils/blob-store";
 
+export const prerender = false;
+
 const store = getStore('galleries');
 const key = `gallery/home`;
 const gallery = await store.get(key, { type: 'json' });
