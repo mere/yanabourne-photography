@@ -6,6 +6,8 @@ import Hero from "~/components/Hero.astro";
 import Gallery from "~/components/Gallery.astro";
 import Tiles from "~/components/Tiles.astro";
 
+export const prerender = false;
+
 const { slug } = Astro.params;
 
 const store = getStore({
@@ -17,7 +19,6 @@ const store = getStore({
 const key = `gallery/${slug}`;
 const gallery = await store.get(key, { type: 'json' });
 
-console.log(gallery);
 ---
 
 {gallery ? (
