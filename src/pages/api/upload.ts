@@ -54,8 +54,30 @@ export const POST: APIRoute = async ({ request }) => {
     // Generate a unique filename
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
-    const filename = `${timestamp}-${randomString}-${file.name}`;
+    
+    // Sanitize the original filename
+    const sanitizedOriginalName = file.name
+      .toLowerCase()
+      .replace(/[^a-z0-9.-]/g, '-') // Replace invalid chars with hyphens
+      .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+      .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+    
+    const filename = `${timestamp}-${randomString}-${sanitizedOriginalName}`;
     const key = `${slug}/${filename}`;
+
+    console.log("Key generation details:", {
+      slug,
+      originalFilename: file.name,
+      sanitizedOriginalName,
+      filename,
+      key,
+      keyLength: key.length,
+      keyContainsSpaces: key.includes(' '),
+      keyContainsSpecialChars: /[^a-z0-9\-\.\/]/.test(key),
+      keyStartsWithSlash: key.startsWith('/'),
+      keyEndsWithSlash: key.endsWith('/'),
+      keyHasMultipleSlashes: /\/{2,}/.test(key)
+    });
 
     console.log("Storing file with key:", key);
     console.log("File details:", {
