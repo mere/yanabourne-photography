@@ -63,7 +63,6 @@ export default function Tile({
             fallback={import.meta.env.PUBLIC_LOCAL ? "astro" : "netlify"}
             className="w-full h-full object-cover"
           />
-          
         </div>
       )}
       {text && (

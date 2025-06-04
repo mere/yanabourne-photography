@@ -190,9 +190,14 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
     setHasChanges(true);
   };
 
-  const handleTileClick = (e: React.MouseEvent, index: number) => {
+  const handleTileClick = (e: React.MouseEvent | React.TouchEvent, index: number) => {
     if (isDragging) return;
-
+    
+    // Prevent default touch behavior
+    if ('touches' in e) {
+      e.preventDefault();
+    }
+    
     if (selectedTileIndex === index) {
       setSelectedTileIndex(null);
     } else {
@@ -200,12 +205,16 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
     }
   };
 
-  const handleContainerClick = (e: React.MouseEvent) => {
+  const handleContainerClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (isDragging) return;
-
+    
+    // Prevent default touch behavior
+    if ('touches' in e) {
+      e.preventDefault();
+    }
+    
     // Only deselect if clicking the container itself, not its children
-
-    if (e.target.classList.contains("react-grid-layout")) {
+    if (e.target === e.currentTarget) {
       setSelectedTileIndex(null);
     }
   };
@@ -773,6 +782,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
               key={tile.id}
               className={`h-full ${selectedTileIndex === index ? "ring-2 ring-blue-500" : ""}`}
               onClick={(e) => handleTileClick(e, index)}
+              onTouchStart={(e) => handleTileClick(e, index)}
             >
               <div className="tile-content h-full">
                 <Tile
