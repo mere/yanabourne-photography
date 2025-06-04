@@ -70,16 +70,20 @@ export default function FileUploader({ isOpen, onClose, onSave, onDelete, hasIma
         method: 'POST',
         body: formData,
       });
-
+      console.log('response:', response);
       if (!response.ok) {
         const data = await response.json();
+        console.error('/api/upload response error:', data);
         throw new Error(data.error || 'Upload failed');
       }
 
       const { url } = await response.json();
-      
+      console.log('Upload successful:', url);
+
       onSave(url);
+      console.log('onSave done');
       onClose();
+      console.log('onClose done');
     } catch (err) {
       console.error('Upload error:', err);
       setError(err instanceof Error ? err.message : 'Upload failed');
