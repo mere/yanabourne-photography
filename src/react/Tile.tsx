@@ -57,8 +57,7 @@ export default function Tile({
         <div className="relative w-full h-full">
            <Image
             src={`${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${image}`}
-            width={1200}
-            height={1200}
+            layout="fullWidth"
             alt={imageAlt}
             fallback={import.meta.env.PUBLIC_LOCAL ? "astro" : "netlify"}
             className="w-full h-full object-cover"

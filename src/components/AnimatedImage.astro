@@ -22,9 +22,9 @@ const url = `${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${src}`
   src={url}
   alt={alt || ''}
   className={`util-image w-full h-full object-cover`}
-  width={1200}
-  height={1200}
+  layout="fullWidth"
   fallback={import.meta.env.PUBLIC_LOCAL ? "astro" : "netlify"}
   loading="lazy"
+  
 />
 )}

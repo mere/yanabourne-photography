@@ -196,6 +196,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
     // Prevent default touch behavior
     if ('touches' in e) {
       e.preventDefault();
+      e.stopPropagation();
     }
     
     if (selectedTileIndex === index) {
@@ -211,12 +212,25 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
     // Prevent default touch behavior
     if ('touches' in e) {
       e.preventDefault();
+      e.stopPropagation();
     }
     
     // Only deselect if clicking the container itself, not its children
     if (e.target === e.currentTarget) {
       setSelectedTileIndex(null);
     }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Prevent default touch behavior
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    // Prevent default touch behavior
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleAddTile = async () => {
@@ -782,7 +796,9 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
               key={tile.id}
               className={`h-full ${selectedTileIndex === index ? "ring-2 ring-blue-500" : ""}`}
               onClick={(e) => handleTileClick(e, index)}
-              onTouchStart={(e) => handleTileClick(e, index)}
+              onTouchEnd={(e) => handleTileClick(e, index)}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
             >
               <div className="tile-content h-full">
                 <Tile
