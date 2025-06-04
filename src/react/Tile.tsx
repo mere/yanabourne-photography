@@ -60,7 +60,7 @@ export default function Tile({
             width={1200}
             height={1200}
             alt={imageAlt}
-            fallback="astro"
+            fallback={import.meta.env.PUBLIC_LOCAL ? "astro" : "netlify"}
             className="w-full h-full object-cover"
           />
           

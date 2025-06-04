@@ -15,7 +15,7 @@ const {
 } = Astro.props;
 
 const url = `${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${src}`
-// https://yanabourne-photography.netlify.app/.netlify/images?url=https%3A%2F%2Fyanabourne-photography.netlify.app%2Fapi%2Fget-raw-image%2F%3Fkey%3Dhome%2F1748978425856-xom7eucz00n-DSCF7793.jpg&w=300
+
 ---
 {src && (
 <Image
@@ -24,7 +24,7 @@ const url = `${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${src}`
   className={`util-image w-full h-full object-cover`}
   width={1200}
   height={1200}
-  fallback={import.meta.env.NETLIFY? "netlify" : "astro"}
+  fallback={import.meta.env.PUBLIC_LOCAL ? "astro" : "netlify"}
   loading="lazy"
 />
 )}
