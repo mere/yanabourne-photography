@@ -15,17 +15,20 @@ export const POST: APIRoute = async ({ request }) => {
     
 
     if (!adminSecret || adminSecret !== import.meta.env.ADMIN_SECRET) {
+      console.log('Unauthorized');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-
+    console.log('Authorized');
     // Get file and gallery slug from form data
     const formData = await request.formData();
+    console.log('formData:', formData);
     const file = formData.get('file') as File;
     const slug = formData.get('slug') as string;
-
+    console.log('file:', file);
+    console.log('slug:', slug);
     console.log("Received form data:", {
       file: file?.name,
       slug,
