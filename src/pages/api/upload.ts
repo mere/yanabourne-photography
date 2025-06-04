@@ -37,6 +37,17 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // Validate slug format
+    const slugPattern = /^[a-z0-9-]+$/;
+    if (!slugPattern.test(slug)) {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid slug format. Slug must contain only lowercase letters, numbers, and hyphens.' 
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Initialize blob store
     const store = getStore('file-uploads');
 

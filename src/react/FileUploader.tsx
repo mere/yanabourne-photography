@@ -57,6 +57,14 @@ export default function FileUploader({ isOpen, onClose, onSave, onDelete, hasIma
 
       console.log("Form data:", formData);
       console.log("slug:", slug);
+      console.log("slug validation:", {
+        length: slug.length,
+        containsSpaces: slug.includes(' '),
+        containsSpecialChars: /[^a-z0-9-]/.test(slug),
+        startsWithHyphen: slug.startsWith('-'),
+        endsWithHyphen: slug.endsWith('-'),
+        hasMultipleHyphens: /-{2,}/.test(slug)
+      });
       // Upload file using the Astro endpoint
       const response = await fetch('/api/upload', {
         method: 'POST',

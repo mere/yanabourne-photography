@@ -28,6 +28,9 @@
     "react-dom": "^19.1.0",
     "react-grid-layout": "^1.5.1",
     "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "tailwindcss": "^4.1.8"
   }
 }
