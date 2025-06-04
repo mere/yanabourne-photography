@@ -5,12 +5,14 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    console.log('upload request');
     // Get admin secret from cookie
     const cookies = request.headers.get('cookie')?.split(';') || [];
+    console.log('cookies:', cookies);
     const adminSecretCookie = cookies.find(cookie => cookie.trim().startsWith('admin_secret='));
     const adminSecret = adminSecretCookie ? adminSecretCookie.split('=')[1] : null;
+    console.log('adminSecret:', "*".repeat(adminSecret?.length || 0));
     
-    console.log("Admin secret from cookie:", adminSecret);
 
     if (!adminSecret || adminSecret !== import.meta.env.ADMIN_SECRET) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
