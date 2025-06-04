@@ -150,10 +150,10 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
   // Update container width and row height on window resize
   useEffect(() => {
     const updateWidth = () => {
-      const width = window.innerWidth - 24; // 32px for padding
+      const width = window.innerWidth; // 32px for padding
       setContainerWidth(width);
       // Calculate row height to make tiles square (accounting for margins)
-      const rowHeight = (width - 11 * 19) / 12; // 11 gaps of 16px between 12 columns
+      const rowHeight = (width) / 12; // 11 gaps of 16px between 12 columns
       setRowHeight(rowHeight);
     };
 
@@ -743,8 +743,12 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
   }
 
   return (
-    <div className="w-full px-2">
-      <div className="w-full min-h-[500px] " onClickCapture={handleContainerClick} onTouchStartCapture={handleContainerClick}>
+    <div className="w-full">
+      <div 
+        className="w-full min-h-[500px] relative" 
+        onClickCapture={handleContainerClick} 
+        onTouchStartCapture={handleContainerClick}
+      >
         <GridLayout
           className="layout"
           layout={layout}
@@ -758,18 +762,18 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
           onResizeStop={handleResizeStop}
           isDraggable
           isResizable
-          margin={[16, 16]}
+          margin={[0, 0]}
           preventCollision={false}
           compactType="vertical"
           useCSSTransforms={false}
           draggableHandle=".tile-content"
-          resizeHandles={["se", "sw", "ne", "nw", "e", "w", "n", "s"]}
+          resizeHandles={['se', 'sw', 'ne', 'nw', 'e', 'w', 'n', 's']}
           containerPadding={[0, 0]}
         >
           {gallery.layout.map((tile, index) => (
             <div 
               key={tile.id} 
-              className={`h-full ${selectedTileIndex === index ? 'ring-3 ring-purple-500' : ''}`}
+              className={`h-full p-2 ${selectedTileIndex === index ? 'ring-3 ring-purple-500 after:content-[""] after:absolute after:inset-0 after:bg-purple-500/20 after:rounded-md after:pointer-events-none' : ''}`}
               data-id={tile.id}
             >
               <div className="tile-content h-full">
@@ -784,10 +788,22 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
             </div>
           ))}
         </GridLayout>
+        {/* Grid overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+              linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
+            `,
+            backgroundSize: 'calc(100% / 12) calc(100% / 12)',
+            opacity: 0.5
+          }}
+        />
       </div>
 
       {/* Fixed position buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-between shadow-lg">
+      <div className="fixed bottom-0 z-200 bg-zinc-800/20 backdrop-blur-sm left-0 right-0 bg-white border-t border-zinc-500 p-4 flex justify-between shadow-lg shadow-black/20">
         <div className="flex gap-2">
           {selectedTileIndex === null && (
             <>
@@ -801,43 +817,47 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </button>
-                <span className="text-[10px] mt-1 text-gray-600">Add Tile</span>
+                <span className="text-[10px] mt-1 text-white">Add Tile</span>
               </div>
-              <div className="flex flex-col items-center">
-                <label
-                  className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
-                  title="Batch Upload Images"
-                >
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files) {
-                        handleBatchUpload(Array.from(e.target.files));
-                      }
-                    }}
-                    disabled={isBatchUploading}
-                  />
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </label>
-                <span className="text-[10px] mt-1 text-gray-600">Batch Upload</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <button
-                  onClick={handleDeleteAll}
-                  className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                  title="Delete All Tiles"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-                <span className="text-[10px] mt-1 text-gray-600">Delete All</span>
-              </div>
+              {!isHomeGallery && (
+                <>
+                  <div className="flex flex-col items-center">
+                    <label
+                      className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer"
+                      title="Batch Upload Images"
+                    >
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            handleBatchUpload(Array.from(e.target.files));
+                          }
+                        }}
+                        disabled={isBatchUploading}
+                      />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </label>
+                    <span className="text-[10px] mt-1 text-white">Batch Upload</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <button
+                      onClick={handleDeleteAll}
+                      className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                      title="Delete All Tiles"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                    <span className="text-[10px] mt-1 text-white">Delete All</span>
+                  </div>
+                </>
+              )}
               {isHomeGallery && (
                 <div className="flex flex-col items-center">
                   <button
@@ -849,7 +869,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   </button>
-                  <span className="text-[10px] mt-1 text-gray-600">New Gallery</span>
+                  <span className="text-[10px] mt-1 text-white">New Gallery</span>
                 </div>
               )}
             </>
@@ -866,7 +886,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </button>
-                <span className="text-[10px] mt-1 text-gray-600">Image</span>
+                <span className="text-[10px] mt-1 text-white">Image</span>
               </div>
               <div className="flex flex-col items-center">
                 <button
@@ -878,7 +898,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </button>
-                <span className="text-[10px] mt-1 text-gray-600">Text</span>
+                <span className="text-[10px] mt-1 text-white">Text</span>
               </div>
               <div className="flex flex-col items-center">
                 <button
@@ -890,7 +910,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>
                 </button>
-                <span className="text-[10px] mt-1 text-gray-600">Link</span>
+                <span className="text-[10px] mt-1 text-white">Link</span>
               </div>
               <div className="flex flex-col items-center">
                 <button
@@ -902,7 +922,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
-                <span className="text-[10px] mt-1 text-gray-600">Delete</span>
+                <span className="text-[10px] mt-1 text-white">Delete</span>
               </div>
             </>
           )}
@@ -918,7 +938,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <span className="text-[10px] mt-1 text-gray-600">Cancel</span>
+            <span className="text-[10px] mt-1 text-white">Cancel</span>
           </div>
           <div className="flex flex-col items-center">
             <button
@@ -935,7 +955,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </button>
-            <span className="text-[10px] mt-1 text-gray-600">Save</span>
+            <span className="text-[10px] mt-1 text-white">Save</span>
           </div>
         </div>
       </div>
