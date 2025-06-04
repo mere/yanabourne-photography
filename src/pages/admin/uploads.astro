@@ -4,6 +4,7 @@ import Header from '../../react/Header';
 import { getStore } from '~/utils/blob-store';
 import type { Gallery, GalleryTile } from '~/types/gallery';
 import Hero from '~/components/Hero.astro';
+import AnimatedImage from '~/components/AnimatedImage.astro';
 
 export const prerender = false;
 
@@ -107,10 +108,9 @@ const unusedCount = uploads.filter(upload => !upload.isUsed).length;
       {uploads.map((upload: UploadWithStatus) => (
         <div class={`bg-white shadow rounded-lg overflow-hidden ${!upload.isUsed ? 'border-2 border-red-500' : ''}`}>
           <div class="relative aspect-square">
-            <img
-              src={`/api/get-raw-image?key=${upload.key}`}
+            <AnimatedImage
+              src={upload.key as any}
               alt={upload.metadata?.name}
-              class="w-full h-full object-cover"
             />
             {!upload.isUsed && (
               <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-sm">

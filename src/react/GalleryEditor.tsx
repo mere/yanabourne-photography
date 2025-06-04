@@ -190,47 +190,22 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
     setHasChanges(true);
   };
 
-  const handleTileClick = (e: React.MouseEvent | React.TouchEvent, index: number) => {
-    if (isDragging) return;
-    
-    // Prevent default touch behavior
-    if ('touches' in e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    if (selectedTileIndex === index) {
-      setSelectedTileIndex(null);
-    } else {
-      setSelectedTileIndex(index);
-    }
-  };
-
   const handleContainerClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (isDragging) return;
     
-    // Prevent default touch behavior
-    if ('touches' in e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    // Only deselect if clicking the container itself, not its children
-    if (e.target === e.currentTarget) {
+    const target = e.target as HTMLElement;
+    const tileId = target.closest('[data-id]')?.getAttribute('data-id');
+    console.log("tileId", tileId, target);
+    if (tileId) {
+      // Click was on a tile
+      const index = gallery?.layout.findIndex(tile => tile.id === tileId) ?? -1;
+      if (index !== -1) {
+        setSelectedTileIndex(selectedTileIndex === index ? null : index);
+      }
+    } else {
+      // Click was on the background
       setSelectedTileIndex(null);
     }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    // Prevent default touch behavior
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    // Prevent default touch behavior
-    e.preventDefault();
-    e.stopPropagation();
   };
 
   const handleAddTile = async () => {
@@ -769,7 +744,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
 
   return (
     <div className="w-full px-2">
-      <div className="w-full min-h-[500px] " onClick={handleContainerClick}>
+      <div className="w-full min-h-[500px] " onClickCapture={handleContainerClick} onTouchStartCapture={handleContainerClick}>
         <GridLayout
           className="layout"
           layout={layout}
@@ -792,20 +767,18 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
           containerPadding={[0, 0]}
         >
           {gallery.layout.map((tile, index) => (
-            <div
-              key={tile.id}
-              className={`h-full ${selectedTileIndex === index ? "ring-2 ring-blue-500" : ""}`}
-              onClick={(e) => handleTileClick(e, index)}
-              onTouchEnd={(e) => handleTileClick(e, index)}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
+            <div 
+              key={tile.id} 
+              className={`h-full ${selectedTileIndex === index ? 'ring-3 ring-purple-500' : ''}`}
+              data-id={tile.id}
             >
               <div className="tile-content h-full">
                 <Tile
                   image={tile.imageUrl}
                   imageAlt={tile.altText}
-                  text={tile.description || ""}
+                  text={tile.description || ''}
                   className="h-full"
+                  data-id={tile.id}
                 />
               </div>
             </div>
@@ -828,7 +801,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </button>
-                <span className="text-xs mt-1 text-gray-600">Add Tile</span>
+                <span className="text-[10px] mt-1 text-gray-600">Add Tile</span>
               </div>
               <div className="flex flex-col items-center">
                 <label
@@ -848,10 +821,10 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     disabled={isBatchUploading}
                   />
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </label>
-                <span className="text-xs mt-1 text-gray-600">Upload</span>
+                <span className="text-[10px] mt-1 text-gray-600">Batch Upload</span>
               </div>
               <div className="flex flex-col items-center">
                 <button
@@ -863,7 +836,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
-                <span className="text-xs mt-1 text-gray-600">Delete All</span>
+                <span className="text-[10px] mt-1 text-gray-600">Delete All</span>
               </div>
               {isHomeGallery && (
                 <div className="flex flex-col items-center">
@@ -876,7 +849,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
                   </button>
-                  <span className="text-xs mt-1 text-gray-600">New Gallery</span>
+                  <span className="text-[10px] mt-1 text-gray-600">New Gallery</span>
                 </div>
               )}
             </>
@@ -893,7 +866,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </button>
-                <span className="text-xs mt-1 text-gray-600">Image</span>
+                <span className="text-[10px] mt-1 text-gray-600">Image</span>
               </div>
               <div className="flex flex-col items-center">
                 <button
@@ -905,7 +878,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </button>
-                <span className="text-xs mt-1 text-gray-600">Text</span>
+                <span className="text-[10px] mt-1 text-gray-600">Text</span>
               </div>
               <div className="flex flex-col items-center">
                 <button
@@ -917,7 +890,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>
                 </button>
-                <span className="text-xs mt-1 text-gray-600">Link</span>
+                <span className="text-[10px] mt-1 text-gray-600">Link</span>
               </div>
               <div className="flex flex-col items-center">
                 <button
@@ -929,7 +902,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
-                <span className="text-xs mt-1 text-gray-600">Delete</span>
+                <span className="text-[10px] mt-1 text-gray-600">Delete</span>
               </div>
             </>
           )}
@@ -945,7 +918,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <span className="text-xs mt-1 text-gray-600">Cancel</span>
+            <span className="text-[10px] mt-1 text-gray-600">Cancel</span>
           </div>
           <div className="flex flex-col items-center">
             <button
@@ -962,7 +935,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </button>
-            <span className="text-xs mt-1 text-gray-600">Save</span>
+            <span className="text-[10px] mt-1 text-gray-600">Save</span>
           </div>
         </div>
       </div>
