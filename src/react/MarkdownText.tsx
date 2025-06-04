@@ -1,8 +1,9 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
-const processText = (text) => {
-    let alignment = 'text-center';
+const processText = (text: string) => {
+    let alignment = '';
     let processedText = text;
   
     // Handle alignment
@@ -18,7 +19,7 @@ const processText = (text) => {
     }
   
     // Handle padding and newlines
-    const parts = processedText.split(/(:::padding\s+\d+|\n)/).map((part, i) => {
+    const parts = processedText.split(/(:::padding\s+\d+|\n)/).map((part: string, i: number) => {
       if (part.startsWith(':::padding')) {
         const padding = parseInt(part.split(/\s+/)[1]) || 0;
         return <span key={`padding-${i}`} className='block' style={{ height: `${padding}px` }} />;
@@ -31,14 +32,17 @@ const processText = (text) => {
     return { alignment, parts };
   };
 
-export default function MarkdownText({ text }) {
-    console.log(text);
+interface MarkdownTextProps {
+  text: string;
+}
+
+export default function MarkdownText({ text }: MarkdownTextProps) {
   return (
     <div className="markdown-text whitespace-pre-wrap" data-text={text}>
-
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={{
           h1: ({ node, ...props }) => <h1 className="text-4xl font-bold mb-4" {...props} />,
           h2: ({ node, ...props }) => <h2 className="text-3xl font-bold mb-3" {...props} />,
           h3: ({ node, ...props }) => <h3 className="text-2xl font-bold mb-2" {...props} />,
@@ -54,13 +58,13 @@ export default function MarkdownText({ text }) {
           blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2 whitespace-pre-wrap" {...props} />,
           code: ({ node, ...props }) => <code className="bg-gray-100 rounded px-1" {...props} />,
           pre: ({ node, ...props }) => <pre className="bg-gray-100 rounded p-2 mb-2 overflow-x-auto whitespace-pre" {...props} />,
+          section: ({ node, ...props }) => <section className="mb-4" {...props} />,
         }}
-        allowedElements={['br', 'h1', 'h2', 'h3', 'p', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre']}
+        allowedElements={['br', 'h1', 'h2', 'h3', 'p', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre', 'section']}
         skipHtml={false}
-        children={text}
-        >
-      
-    </ReactMarkdown>
-        </div>
+      >
+        {text}
+      </ReactMarkdown>
+    </div>
   );
 }
