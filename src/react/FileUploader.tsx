@@ -72,6 +72,8 @@ export default function FileUploader({ isOpen, onClose, onSave, onDelete, hasIma
       });
       console.log('response:', response);
       if (!response.ok) {
+        const text = await response.text();
+        console.error('/api/upload response error text:', text);
         const data = await response.json();
         console.error('/api/upload response error:', data);
         throw new Error(data.error || 'Upload failed');
