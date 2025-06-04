@@ -58,7 +58,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Generate a unique filename
     const timestamp = Date.now();
+    console.log('timestamp:', timestamp);
     const randomString = Math.random().toString(36).substring(2, 15);
+    console.log('randomString:', randomString);
     
     // Sanitize the original filename
     const sanitizedOriginalName = file.name
@@ -66,10 +68,11 @@ export const POST: APIRoute = async ({ request }) => {
       .replace(/[^a-z0-9.-]/g, '-') // Replace invalid chars with hyphens
       .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
       .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
-    
+    console.log('sanitizedOriginalName:', sanitizedOriginalName);
     const filename = `${timestamp}-${randomString}-${sanitizedOriginalName}`;
+    console.log('filename:', filename);
     const key = `${slug}/${filename}`;
-
+    console.log('key:', key);
     console.log("Key generation details:", {
       slug,
       originalFilename: file.name,
