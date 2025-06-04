@@ -259,6 +259,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
         },
         body: JSON.stringify({
           slug: gallery.slug,
+          title: gallery.title,
           layout: updatedLayout
         }),
       });

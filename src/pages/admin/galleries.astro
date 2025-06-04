@@ -4,6 +4,7 @@ import Header from '../../react/Header';
 import { getStore } from '~/utils/blob-store';
 import type { Gallery } from '~/types/gallery';
 import Hero from '~/components/Hero.astro';
+import JsonEditor from '../../react/JsonEditor';
 
 export const prerender = false;
 
@@ -80,6 +81,12 @@ galleries.sort((a: GalleryWithMetadata, b: GalleryWithMetadata) => b.lastModifie
                 Edit
               </a>
               <button
+                class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded"
+                onclick={`window.dispatchEvent(new CustomEvent('openJsonEditor', { detail: ${JSON.stringify(gallery)} }))`}
+              >
+                Edit JSON
+              </button>
+              <button
                 class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
                 onclick={`if(confirm('Are you sure you want to delete this gallery?')) {
                   fetch('/api/gallery?slug=${gallery.slug}', { method: 'DELETE' })
@@ -102,3 +109,5 @@ galleries.sort((a: GalleryWithMetadata, b: GalleryWithMetadata) => b.lastModifie
     </div>
   </div>
 </Layout>
+
+<JsonEditor client:load />

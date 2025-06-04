@@ -142,10 +142,10 @@ export const PUT: APIRoute = async ({ request }) => {
     }
 
     const data = await request.json();
-    const { slug, layout } = data;
+    const { slug, layout, title } = data;
 
-    if (!slug || !layout) {
-      return new Response(JSON.stringify({ error: 'Gallery slug and layout are required' }), {
+    if (!slug || !layout || !title) {
+      return new Response(JSON.stringify({ error: 'Gallery slug, title, and layout are required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -160,10 +160,10 @@ export const PUT: APIRoute = async ({ request }) => {
       });
     }
 
-    // Update gallery
+    // Update gallery with all provided data
     const updatedGallery = {
       ...existingData,
-      layout,
+      ...data,
       updatedAt: Date.now()
     };
 
