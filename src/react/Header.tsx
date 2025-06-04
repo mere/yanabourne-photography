@@ -25,7 +25,7 @@ const Header = () => {
                     ${pathname === item.path ? "font-semibold" : ""} flex items-center gap-1`}
                   title={item.name}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5 block md:hidden" />
                   <span className="hidden md:block">{item.name}</span>
                 </a>
               );

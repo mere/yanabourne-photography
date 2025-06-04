@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/markdown-component": "^1.0.5",
     "@astrojs/mdx": "^4.3.0",
     "@astrojs/netlify": "^6.3.4",
     "@astrojs/react": "^4.3.0",
@@ -26,6 +27,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-grid-layout": "^1.5.1",
+    "react-markdown": "^10.1.0",
     "tailwindcss": "^4.1.8"
   }
 }

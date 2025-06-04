@@ -1,4 +1,5 @@
 ---
+import MarkdownText from "~/react/MarkdownText";
 import AnimatedImage from "./AnimatedImage.astro";
 
 interface Props {
@@ -36,12 +37,17 @@ const wrapperProps = link ? { href: link } : {};
         class:list={[
           "tile-content",
           "mx-auto",
-          "p-2 md:p-4 z-100 absolute bottom-0 left-0 right-0 text-white ",
+          "p-2 md:p-4 z-100 absolute bottom-0 left-0 right-0  ",
           image ? "" : "h-full",
         ]}
       >
         <div class="flex items-center justify-center">
-          <p class="inline-block bg-black/20 backdrop-blur-xs px-0.5 md:px-4 py-0 rounded text-center text-sm md:text-3xl font-karla">{text}</p>
+          <div
+            class={`preserve-whitespace inline-block 
+              ${image ? "bg-black/20 backdrop-blur-xs text-white text-sm md:text-3xl" : "text-black"} px-0.5 md:px-4 py-0 rounded text-center  font-karla`}
+          >
+            <MarkdownText client:load text={text} />
+          </div>
         </div>
       </div>
     )
