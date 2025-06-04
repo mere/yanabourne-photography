@@ -4,6 +4,7 @@ import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 import netlify from "@astrojs/netlify";
+import { imageService } from "@unpic/astro/service";
 
 // https://astro.build/config
 export default defineConfig({
@@ -18,7 +19,8 @@ export default defineConfig({
   },
 
   image: {
-    domains: ["*.convex.cloud", "*.netlify.blobs.core"],
+    domains: ["*.convex.cloud", "*.netlify.blobs.core", "yanabourne-photography.netlify.app"],
+    service: imageService(),
   },
 
   adapter: netlify(),

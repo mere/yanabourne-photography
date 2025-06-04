@@ -1,7 +1,6 @@
 ---
 
 import AnimatedImage from './AnimatedImage.astro';
-import type { ImageMetadata } from 'astro';
 
 interface Props {
   image?: string;
@@ -27,42 +26,22 @@ const wrapperProps = link ? { href: link } : {};
 <Wrapper
   {...wrapperProps}
   class:list={[
-    'h-full w-full overflow-hidden bg-gray-200 shadow-lg transition-all duration-300',
+    'h-full w-full overflow-hidden',
     link ? 'cursor-pointer' : '',
     className
   ]}
 >
   {image && (
-    <div class="object-cover w-full h-full">
-      <AnimatedImage src={image} alt={imageAlt} />
-    </div>
+    <AnimatedImage src={image} alt={imageAlt} />
   )}
   {text && (
     <div class:list={[
       'tile-content',
-      'p-4 h-full absolute bottom-0 left-0 right-0 text-center text-2xl font-karla',
-      'opacity-0 translate-y-4',
+      'p-4 absolute bottom-0 left-0 right-0 text-center text-lg md:text-2xl font-karla',
+      image ? '' : 'h-full',
     ]}>
-      {text && <p class="text-black">{text}</p>}
+      {text}
     </div>
   )}
-  {link && (
-    <div class="absolute bottom-2 right-2 text-gray-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-      </svg>
-    </div>
-  )}
-</Wrapper>
-
-<style>
-  @reference "tailwindcss";
   
-  :global(.animate .tile-content) {
-    @apply  flex items-center justify-center opacity-100 translate-y-0 transition-all duration-500 ease-in-out delay-200
-  }
-
-  :global(.group:hover .edit-icon) {
-    @apply opacity-100;
-  }
-</style>
+</Wrapper>

@@ -1,5 +1,6 @@
 ---
-import { Image, type LocalImageProps } from "astro:assets";
+import {type LocalImageProps } from "astro:assets";
+import { Image } from "@unpic/react";
 
 type Props = LocalImageProps & {
   class?: string;
@@ -7,71 +8,23 @@ type Props = LocalImageProps & {
   src: string;
 }
 
-
-
 const { 
   src, 
   alt, 
   class: className = "", 
-  widths = [720, 1080, 1440],
-  quality = "high",
-  format = "webp",
-  
 } = Astro.props;
 
-console.log('props', Astro.props);
-
+const url = `${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${src}`
+// https://yanabourne-photography.netlify.app/.netlify/images?url=https%3A%2F%2Fyanabourne-photography.netlify.app%2Fapi%2Fget-raw-image%2F%3Fkey%3Dhome%2F1748978425856-xom7eucz00n-DSCF7793.jpg&w=300
 ---
 {src && (
 <Image
-  src={src}
-  alt={alt}
-  class={`util-image w-full h-full ${className}`}
-  widths={widths}
-  quality={quality}
-  format={format}
-  inferSize={true}
+  src={url}
+  alt={alt || ''}
+  className={`util-image w-full h-full object-cover`}
+  width={1200}
+  height={1200}
+  fallback="astro"
   loading="lazy"
-  sizes="(max-width: 720px) 720px, (max-width: 1080px) 1080px, 1440px"
 />
 )}
-
-<style>
-  @reference "tailwindcss";
-
-  .util-image {
-    @apply origin-center opacity-0 translate-y-4 object-cover;
-  }
-  .util-image.animate {
-    @apply opacity-100 translate-y-0 transition-all duration-500 ease-in-out;
-  }
-</style>
-
-<script>
-  // Define the Intersection Observer
-  const observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target as HTMLImageElement;
-        // If image is already loaded, animate it immediately
-        if (img.complete) {
-          img.classList.add("animate");
-        } else {
-          // Otherwise wait for load
-          img.addEventListener('load', () => {
-            img.classList.add("animate");
-          });
-        }
-        observer.unobserve(img);
-      }
-    });
-  }, {
-    rootMargin: '0px',
-    threshold: 0
-  });
-  
-  // Observe elements with the `util-image` class
-  document.querySelectorAll('.util-image').forEach(target => {
-    observer.observe(target);
-  });
-</script> 

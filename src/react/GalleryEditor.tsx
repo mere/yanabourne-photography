@@ -138,11 +138,11 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
   // Update container width and row height on window resize
   useEffect(() => {
     const updateWidth = () => {
-      const width = Math.min(window.innerWidth - 32, 1200); // 32px for padding
+      const width = window.innerWidth - 24; // 32px for padding
       setContainerWidth(width);
       // Calculate row height to make tiles square (accounting for margins)
-      const columnWidth = (width - (11 * 10)) / 12; // 11 gaps of 10px between 12 columns
-      setRowHeight(columnWidth);
+      const rowHeight = (width - (11 * 19)) / 12; // 11 gaps of 16px between 12 columns
+      setRowHeight(rowHeight);
     };
 
     updateWidth();
@@ -208,32 +208,6 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
       h: 4,
     };
 
-    if (isHomeGallery) {
-      // For home gallery, create a new gallery for this tile
-      try {
-        const response = await fetch('/api/gallery', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            title: 'New Gallery',
-            slug: `gallery-${Date.now()}`,
-            layout: []
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to create new gallery');
-        }
-
-        const newGallery = await response.json();
-        
-      } catch (error) {
-        setToast({ message: 'Failed to create new tile', type: 'error' });
-        return;
-      }
-    }
 
     // Add to layout
     const newLayout = [
@@ -627,14 +601,16 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
   const handleDeleteAll = () => {
     if (!gallery) return;
     
-    // Clear layout
-    setLayout([]);
-    
-    // Clear gallery layout
-    gallery.layout = [];
-    
-    setHasChanges(true);
-    setToast({ message: 'All tiles deleted', type: 'info' });
+    if (window.confirm('Are you sure you want to delete all tiles? This action cannot be undone.')) {
+      // Clear layout
+      setLayout([]);
+      
+      // Clear gallery layout
+      gallery.layout = [];
+      
+      setHasChanges(true);
+      setToast({ message: 'All tiles deleted', type: 'info' });
+    }
   };
 
   if (!gallery) {
@@ -702,8 +678,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
   }
 
   return (
-    <div className="w-full px-4 py-16 pb-32">
-      <h1 className="text-3xl font-bold my-8">Edit Gallery: {gallery.title}</h1>
+    <div className="w-full px-2">
       <div 
         className="w-full min-h-[500px]" 
         onClick={handleContainerClick}
@@ -721,7 +696,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
           onResizeStop={handleResizeStop}
           isDraggable
           isResizable
-          margin={[10, 10]}
+          margin={[16, 16]}
           preventCollision={false}
           compactType="vertical"
           useCSSTransforms={false}

@@ -1,4 +1,5 @@
 ---
+import Hero from '~/components/Hero.astro';
 import Layout from '../../../layouts/Layout.astro';
 import GalleryEditor from '../../../react/GalleryEditor';
 import Header from '../../../react/Header';
@@ -20,5 +21,6 @@ const gallery = await store.get(key, { type: 'json' });
 
 <Layout title="Edit Gallery" id={slug}>
   <Header client:load />
+  <Hero title={gallery?.title || 'Edit Gallery'} />
   <GalleryEditor client:only="react" gallery={gallery} slug={slug} />
 </Layout> 

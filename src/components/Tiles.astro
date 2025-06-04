@@ -61,22 +61,33 @@ const { gallery } = Astro.props;
 
   .tile-wrapper {
     @apply w-full h-full p-1 md:p-2 relative overflow-hidden;
+    @apply opacity-0 scale-95;
+    @apply transition-all duration-300;
+
+    &.animate {
+      @apply opacity-100 scale-100;
+    }
   }
 
-  .tile-wrapper > :global(*) {
-    @apply w-full h-full;
-  }
 </style>
 
 
-<script>
+<script >
   // Define the Intersection Observer
   const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        const tile = entry.target as HTMLElement;
-        tile.classList.add('animate');
-        observer.unobserve(tile);
+        const img = entry.target.querySelector('.util-image') as HTMLImageElement;
+        
+        if (!img || img.complete) {
+          entry.target.classList.add("animate");
+        } else {
+          // Otherwise wait for load
+          img.addEventListener('load', () => {
+            entry.target.classList.add("animate");
+          });
+        }
+        observer.unobserve(entry.target);
       }
     });
   }, {
@@ -84,7 +95,7 @@ const { gallery } = Astro.props;
     threshold: 0
   });
   
-  // Observe all tiles
+  // Observe elements with the `util-image` class
   document.querySelectorAll('.tile-wrapper').forEach(target => {
     observer.observe(target);
   });

@@ -1,1 +1,1 @@
-{"images":{"remote_images":["https?://*\\.convex\\.cloud/.*","https?://*\\.netlify\\.blobs\\.core/.*"]},"headers":[{"for":"/_astro/*","values":{"Cache-Control":"public, max-age=31536000, immutable"}}]}
+{"images":{"remote_images":["https?://*\\.convex\\.cloud/.*","https?://*\\.netlify\\.blobs\\.core/.*","https?://yanabourne-photography\\.netlify\\.app/.*"]},"headers":[{"for":"/_astro/*","values":{"Cache-Control":"public, max-age=31536000, immutable"}}]}

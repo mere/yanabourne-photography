@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ImageMetadata } from 'astro';
+import { Image } from "@unpic/react";
 
 interface Props {
   image?: string;
@@ -54,11 +55,15 @@ export default function Tile({
     >
       {image && (
         <div className="relative w-full h-full">
-          <img 
-            src={image} 
-            alt={imageAlt} 
+           <Image
+            src={`${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${image}`}
+            width={1200}
+            height={1200}
+            alt={imageAlt}
+            fallback="astro"
             className="w-full h-full object-cover"
           />
+          
         </div>
       )}
       {text && (
