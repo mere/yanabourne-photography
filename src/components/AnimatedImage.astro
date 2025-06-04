@@ -24,7 +24,7 @@ const url = `${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${src}`
   className={`util-image w-full h-full object-cover`}
   width={1200}
   height={1200}
-  fallback="astro"
+  fallback={import.meta.env.NETLIFY? "netlify" : "astro"}
   loading="lazy"
 />
 )}
