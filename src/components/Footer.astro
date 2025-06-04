@@ -5,13 +5,13 @@ const { id } = Astro.props;
 
 <footer class="flex flex-col justify-center items-center bg-white border-t border-gray-200 mt-12 py-6 w-full">
   <div class="flex justify-between items-center gap-4">
-    <p class="text-base text-gray-400 p-0 m-0">
+    <p class="text-xs md:text-base text-gray-400 p-0 m-0">
       &copy; {currentYear} Yana Bourne Photography. All rights reserved.
     </p>
 
     <a
       href={`/gallery/${id || "home"}/edit`}
-      class="text-gray-400 hover:text-gray-500"
+      class="text-gray-400 hover:text-gray-500 mr-2"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

@@ -10,6 +10,10 @@ import FileUploader from "./FileUploader";
 import Auth from "./Auth";
 import type { Gallery, GalleryTile } from "../types/gallery";
 
+const GAP = 1;
+const GRID_GAP_COLOR = "#e5e7eb";
+const GRID_TILE_COLOR = "transparent";
+
 interface Props {
   slug: string;
   gallery: Gallery | null;
@@ -53,7 +57,7 @@ function CreateGalleryModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-1000">
       <div className="bg-white p-6 rounded-lg w-96">
         <h2 className="text-xl font-bold mb-4">Create New Gallery</h2>
         <form onSubmit={handleSubmit}>
@@ -437,10 +441,20 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create gallery");
+        const data = await response.json();
+        if (response.status === 409) {
+          // Gallery already exists, show toast but continue with tile creation
+          setToast({ 
+            message: `Gallery "${title}" already exists. Adding link to existing gallery.`, 
+            type: "info" 
+          });
+        } else {
+          throw new Error(data.error || "Failed to create gallery");
+        }
+      } else {
+        const newGallery = await response.json();
+        setToast({ message: "Gallery created successfully", type: "success" });
       }
-
-      const newGallery = await response.json();
 
       // Find the lowest y position in the current layout
       const maxY = Math.max(...layout.map((item) => item.y + item.h), 0);
@@ -483,9 +497,11 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
 
       setHasChanges(true);
       setIsCreateGalleryOpen(false);
-      setToast({ message: "Gallery created successfully", type: "success" });
     } catch (error) {
-      setToast({ message: "Failed to create gallery", type: "error" });
+      setToast({ 
+        message: error instanceof Error ? error.message : "Failed to create gallery", 
+        type: "error" 
+      });
     }
   };
 
@@ -793,17 +809,18 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: `
-              linear-gradient(to right, #e5e7eb 1px, transparent 1px),
-              linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
+              linear-gradient(to right, ${GRID_GAP_COLOR} ${GAP/2}px, ${GRID_TILE_COLOR} ${GAP/2}px, ${GRID_TILE_COLOR} ${rowHeight - GAP/2}px, ${GRID_GAP_COLOR} ${rowHeight - GAP/2}px),
+              linear-gradient(to bottom, ${GRID_GAP_COLOR} ${GAP/2}px, ${GRID_TILE_COLOR} ${GAP/2}px, ${GRID_TILE_COLOR} ${rowHeight - GAP/2}px, ${GRID_GAP_COLOR} ${rowHeight - GAP/2}px)
+              
             `,
-            backgroundSize: 'calc(100% / 12) calc(100% / 12)',
-            opacity: 0.5
+            backgroundSize: `${rowHeight}px ${rowHeight}px`,
+            opacity: 0.7
           }}
         />
       </div>
 
       {/* Fixed position buttons */}
-      <div className="fixed bottom-0 z-200 bg-zinc-800/20 backdrop-blur-sm left-0 right-0 bg-white border-t border-zinc-500 p-4 flex justify-between shadow-lg shadow-black/20">
+      <div className="fixed bottom-0 z-200 bg-zinc-800/50 backdrop-blur-sm left-0 right-0 bg-white border-t border-zinc-500 p-4 flex justify-between shadow-lg shadow-black/20">
         <div className="flex gap-2">
           {selectedTileIndex === null && (
             <>

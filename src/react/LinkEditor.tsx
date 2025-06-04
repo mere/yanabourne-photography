@@ -17,7 +17,7 @@ export default function LinkEditor({ isOpen, onClose, onSave, initialLink }: Pro
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-1000 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="p-4 border-b flex justify-between items-center">
