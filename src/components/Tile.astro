@@ -46,7 +46,7 @@ const wrapperProps = link ? { href: link } : {};
             class={`preserve-whitespace inline-block 
               ${image ? "bg-black/20 backdrop-blur-xs text-white text-sm md:text-3xl" : "text-black"} px-0.5 md:px-4 py-0 rounded text-center  font-karla`}
           >
-            <MarkdownText client:load text={text} />
+            {image ? text : <MarkdownText client:load text={text} />}
           </div>
         </div>
       </div>
