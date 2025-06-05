@@ -1,6 +1,6 @@
 import { Context } from "@netlify/edge-functions";
 
-export default async (request: Request, context: Context) => {
+export default async (request, context) => {
 
   const joke = await fetch("https://icanhazdadjoke.com/", {
     "headers": {
