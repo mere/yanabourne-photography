@@ -2,12 +2,17 @@
 
 import { getStore as getStoreFromNetlify } from "@netlify/blobs";
 
+const NETLIFY_SITE_ID = Netlify.env.get("NETLIFY_SITE_ID");
+const NETLIFY_BLOBS_TOKEN = Netlify.env.get("NETLIFY_BLOBS_TOKEN");
+const ADMIN_SECRET = Netlify.env.get("ADMIN_SECRET");
+
+
 export const getStore = (key: string) => {
-  if (import.meta.env.NETLIFY_SITE_ID && import.meta.env.NETLIFY_BLOBS_TOKEN) {
+  if (NETLIFY_SITE_ID && NETLIFY_BLOBS_TOKEN) {
   return getStoreFromNetlify({
     name: key,
-    siteID: import.meta.env.NETLIFY_SITE_ID,
-    token: import.meta.env.NETLIFY_BLOBS_TOKEN,
+    siteID: NETLIFY_SITE_ID,
+    token: NETLIFY_BLOBS_TOKEN,
   });
 } else {
     return getStoreFromNetlify(key);
@@ -29,7 +34,7 @@ export default async (request, context) => {
     console.log('adminSecret:', "*".repeat(adminSecret?.length || 0));
     
 
-    if (!adminSecret || adminSecret !== import.meta.env.ADMIN_SECRET) {
+    if (!adminSecret || adminSecret !== ADMIN_SECRET) {
       console.log('Unauthorized');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
