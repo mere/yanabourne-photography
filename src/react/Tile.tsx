@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ImageMetadata } from 'astro';
 import { Image } from "@unpic/react";
-import MarkdownText from './MarkdownText';
+import TypographyWrapper from './TypographyWrapper';
 
 interface Props {
   image?: string;
@@ -48,7 +47,9 @@ export default function Tile({
         <div className="flex">
           <p className={`preserve-whitespace inline-block ${image ? "bg-black/20 backdrop-blur-[1px] text-white text-sm md:text-3xl" : "text-black text-lg"} 
             px-0.5 md:px-4 py-0 rounded font-karla ${text.length > 100 ? "text-sm md:text-base" : ""}`}>
-          {image ? text : <MarkdownText text={text} />}
+          {image ? text : (
+            <TypographyWrapper html={text} />
+          )}
               
               </p>
         </div>

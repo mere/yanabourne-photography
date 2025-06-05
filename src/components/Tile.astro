@@ -1,55 +1,51 @@
 ---
-import MarkdownText from "~/react/MarkdownText";
-import AnimatedImage from "./AnimatedImage.astro";
+import { Image } from "@unpic/react";
+import TypographyWrapper from '../react/TypographyWrapper';
 
 interface Props {
   image?: string;
   imageAlt?: string;
   text?: string;
+  className?: string;
   link?: string;
-  class?: string;
+  id?: string;
 }
 
-const {
-  image,
-  imageAlt = "",
-  text = "",
+const { 
+  image, 
+  imageAlt = '', 
+  text = '', 
+  className = '',
   link,
-  class: className = "",
+  id
 } = Astro.props;
 
 const Wrapper = link ? "a" : "div";
 const wrapperProps = link ? { href: link } : {};
+
+
 ---
 
-<Wrapper
-  {...wrapperProps}
-  class:list={[
-    "h-full w-full overflow-hidden",
-    link ? "cursor-pointer" : "",
-    className,
-  ]}
+<div 
+  class={`${className} ${link ? 'cursor-pointer' : ''} h-full w-full`}
+  data-id={id}
 >
-  {image && <AnimatedImage src={image as any} alt={imageAlt} />}
-  {
-    text && (
-      <div
-        class:list={[
-          "tile-content",
-          "mx-auto",
-          "p-2 md:p-4 z-100 absolute bottom-0 left-0 right-0  ",
-          image ? "" : "h-full",
-        ]}
-      >
-        <div class="flex items-center justify-center">
-          <div
-            class={`preserve-whitespace inline-block 
-              ${image ? "bg-black/20 backdrop-blur-xs text-white text-sm md:text-3xl" : "text-black"} px-0.5 md:px-4 py-0 rounded text-center  font-karla`}
-          >
-            {image ? text : <MarkdownText client:load text={text} />}
-          </div>
-        </div>
-      </div>
-    )
-  }
-</Wrapper>
+  {image && (
+    <Image
+      src={`${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${image}`}
+      layout="fullWidth"
+      alt={imageAlt}
+      fallback={import.meta.env.PUBLIC_LOCAL ? "astro" : "netlify"}
+      className="w-full h-full object-cover"
+    />
+  )}
+  {image && text && (
+    <div class="absolute bottom-0 left-0 right-0 font-karla m-3 ">
+      <span class="preserve-whitespace bg-black/20 backdrop-blur-[1px] text-white text-sm md:text-2xl px-2 py-1 rounded">{text}</span>
+    </div>
+  )} 
+  {!image && text && (
+    <TypographyWrapper html={text} />
+  )}
+  
+</div>
