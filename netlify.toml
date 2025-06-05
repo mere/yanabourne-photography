@@ -1,2 +1,6 @@
 [images]
   remote_images = ["https://yanabourne-photography.netlify.app/.*"]
+
+[[edge_functions]]
+  function = "upload"
+  path = "/api/upload-image"
