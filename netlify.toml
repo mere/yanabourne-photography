@@ -3,4 +3,4 @@
 
 [[edge_functions]]
   function = "upload"
-  path = "/api/upload-image"
+  path = "/api/upload"

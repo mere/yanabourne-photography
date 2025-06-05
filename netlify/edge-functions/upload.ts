@@ -123,7 +123,7 @@ export default async (request, context) => {
     // const url = await store.get(key, { type: 'blob' });
     // console.log("File URL:", url);
 
-    return new Response(JSON.stringify({ url:key }), {
+    return new Response(JSON.stringify({ url:key, edge: true }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
