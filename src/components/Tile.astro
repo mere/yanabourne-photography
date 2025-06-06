@@ -24,7 +24,9 @@ const wrapperProps = tile.link ? { href: tile.link } : {};
 
 ---
 
-<Wrapper {...wrapperProps} class={`${className} ${tile.link ? 'cursor-pointer' : ''} h-full w-full`} data-id={tile.id}>
+<Wrapper {...wrapperProps} class={`${className} ${tile.link ? 'cursor-pointer' : ''}
+    ${tile.imageUrl ? 'bg-gray-100' : ''}
+    h-full w-full`} data-id={tile.id}>
   
   {tile.imageUrl && (
     <ResponsiveImage
