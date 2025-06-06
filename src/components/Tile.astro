@@ -1,51 +1,46 @@
 ---
-import { Image } from "@unpic/react";
+import { ResponsiveImage } from '~/react/ResponsiveImage';
 import TypographyWrapper from '../react/TypographyWrapper';
 
 interface Props {
-  image?: string;
-  imageAlt?: string;
-  text?: string;
+  tile: {
+    id: string,
+    imageUrl: string,
+    altText: string,
+    description: string,
+    link: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number
+  }
   className?: string;
-  link?: string;
-  id?: string;
 }
 
-const { 
-  image, 
-  imageAlt = '', 
-  text = '', 
-  className = '',
-  link,
-  id
-} = Astro.props;
+const { tile, className='' } = Astro.props;
 
-const Wrapper = link ? "a" : "div";
-const wrapperProps = link ? { href: link } : {};
-
+const Wrapper = tile.link ? "a" : "div";
+const wrapperProps = tile.link ? { href: tile.link } : {};
 
 ---
 
-<div 
-  class={`${className} ${link ? 'cursor-pointer' : ''} h-full w-full`}
-  data-id={id}
->
-  {image && (
-    <Image
-      src={`${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${image}`}
-      layout="fullWidth"
-      alt={imageAlt}
-      fallback={import.meta.env.PUBLIC_LOCAL ? "astro" : "netlify"}
-      className="w-full h-full object-cover"
+<Wrapper {...wrapperProps} class={`${className} ${tile.link ? 'cursor-pointer' : ''} h-full w-full`} data-id={tile.id}>
+  
+  {tile.imageUrl && (
+    <ResponsiveImage
+      id={tile.imageUrl}
+      w={tile.w * 300}
+      h={tile.h * 300}
+      site={import.meta.env.PUBLIC_URL}
+      alt={tile.altText}
     />
   )}
-  {image && text && (
+  {tile.imageUrl && tile.description && (
     <div class="absolute bottom-0 left-0 right-0 font-karla m-3 ">
-      <span class="preserve-whitespace bg-black/20 backdrop-blur-[1px] text-white text-sm md:text-2xl px-2 py-1 rounded">{text}</span>
+      <span class="preserve-whitespace bg-black/20 backdrop-blur-[1px] text-white text-sm md:text-2xl px-2 py-1 rounded">{tile.description}</span>
     </div>
   )} 
-  {!image && text && (
-    <TypographyWrapper html={text} />
+  {!tile.imageUrl && tile.description && (
+    <TypographyWrapper html={tile.description} />
   )}
-  
-</div>
+</Wrapper>

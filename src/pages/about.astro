@@ -16,5 +16,5 @@ const gallery = await store.get(key, { type: 'json' });
 <Layout title={gallery.title} id={gallery.slug}>
   <Header client:load />
   <Hero title={gallery.title} />
-  <Tiles gallery={gallery} />
+  <Tiles gallery={gallery} class="responsive-grid" />
 </Layout>

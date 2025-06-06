@@ -1,22 +1,23 @@
 ---
-import Tile from './Tile.astro';
-import convex from '../lib/convex';
-import { api } from '../../convex/_generated/api';
-import type { Doc } from 'convex/_generated/dataModel';
+import Tile from "./Tile.astro";
+import convex from "../lib/convex";
+import { api } from "../../convex/_generated/api";
+import type { Doc } from "convex/_generated/dataModel";
 
 interface Props {
-  gallery: Doc<'galleries'>;
+  gallery: Doc<"galleries">;
+  class?: string;
 }
 
-const { gallery } = Astro.props;
+const { gallery, class: className } = Astro.props;
 
-
+console.log(gallery.layout);
 ---
 
 <div class="tiles-container">
   <!-- <h1 class="gallery-title">{gallery.title}</h1> -->
   <!-- {gallery.description && <p class="gallery-description">{gallery.description}</p>} -->
-  <div class="tiles-grid">
+  <div class={`tiles-grid ${className}`}>
     {
       gallery.layout.map((tile) => (
         <div
@@ -27,10 +28,7 @@ const { gallery } = Astro.props;
           `}
         >
           <Tile
-            image={tile.imageUrl}
-            imageAlt={tile.altText || ''}
-            text={tile.description}
-            link={tile.link}
+            tile={tile}
           />
         </div>
       ))
@@ -42,7 +40,7 @@ const { gallery } = Astro.props;
   @reference "tailwindcss";
 
   .tiles-container {
-    @apply w-full px-4 min-h-[62vh] ;
+    @apply w-full px-4 min-h-[62vh];
   }
 
   .gallery-title {
@@ -54,10 +52,16 @@ const { gallery } = Astro.props;
   }
 
   .tiles-grid {
-    @apply grid;
+    display: grid;
     grid-template-columns: repeat(12, calc((100vw - 32px) / 12));
     grid-auto-rows: calc((100vw - 32px) / 12);
   }
+  @media (max-width: 768px) {
+    .responsive-grid.tiles-grid  {
+      @apply flex flex-col;
+    }
+  }
+  
 
   .tile-wrapper {
     @apply w-full h-full p-1 md:p-2 relative overflow-hidden;
@@ -68,35 +72,38 @@ const { gallery } = Astro.props;
       @apply opacity-100 scale-100;
     }
   }
-
 </style>
 
-
-<script >
+<script>
   // Define the Intersection Observer
-  const observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target.querySelector('.util-image') as HTMLImageElement;
-        
-        if (!img || img.complete) {
-          entry.target.classList.add("animate");
-        } else {
-          // Otherwise wait for load
-          img.addEventListener('load', () => {
+  const observer = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target.querySelector(
+            ".util-image"
+          ) as HTMLImageElement;
+
+          if (!img || img.complete) {
             entry.target.classList.add("animate");
-          });
+          } else {
+            // Otherwise wait for load
+            img.addEventListener("load", () => {
+              entry.target.classList.add("animate");
+            });
+          }
+          observer.unobserve(entry.target);
         }
-        observer.unobserve(entry.target);
-      }
-    });
-  }, {
-    rootMargin: '0px',
-    threshold: 0
-  });
-  
+      });
+    },
+    {
+      rootMargin: "0px",
+      threshold: 0,
+    }
+  );
+
   // Observe elements with the `util-image` class
-  document.querySelectorAll('.tile-wrapper').forEach(target => {
+  document.querySelectorAll(".tile-wrapper").forEach((target) => {
     observer.observe(target);
   });
-</script> 
+</script>

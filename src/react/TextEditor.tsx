@@ -4,6 +4,7 @@ import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import TypographyWrapper from './TypographyWrapper';
+import { useEffect } from 'react';
 
 interface Props {
   isOpen: boolean;
@@ -29,6 +30,13 @@ export default function TextEditor({ isOpen, onClose, onSave, initialText }: Pro
       // Optional: Auto-save or other update handling
     },
   });
+
+  // Update editor content when initialText changes
+  useEffect(() => {
+    if (editor && initialText !== editor.getHTML()) {
+      editor.commands.setContent(initialText);
+    }
+  }, [editor, initialText]);
 
   if (!isOpen || !editor) return null;
 
@@ -128,11 +136,9 @@ export default function TextEditor({ isOpen, onClose, onSave, initialText }: Pro
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <div className="flex-1 p-4 min-h-[200px]">
-            <TypographyWrapper>
-              <EditorContent editor={editor} className="min-h-[200px]" />
-            </TypographyWrapper>
+        <div className="flex-1 overflow-hidden flex flex-col h-full">
+          <div className="flex-1 p-4 ">
+            <EditorContent editor={editor} className=" prose prose-lg font-karla font-light max-w-none px-4" />
           </div>
         </div>
 

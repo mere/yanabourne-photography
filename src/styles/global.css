@@ -14,7 +14,7 @@
   margin-top: 0;
   margin-bottom: 0.8888889em;
   line-height: 1.1111111;
-  font-weight: 700;
+  font-weight: 300;
 }
 
 .prose h2 {
@@ -22,7 +22,7 @@
   margin-top: 2em;
   margin-bottom: 1em;
   line-height: 1.3333333;
-  font-weight: 700;
+  font-weight: 300;
 }
 
 .prose h3 {
@@ -30,7 +30,7 @@
   margin-top: 1.6em;
   margin-bottom: 0.6em;
   line-height: 1.6;
-  font-weight: 600;
+  font-weight: 300;
 }
 
 .prose p {
