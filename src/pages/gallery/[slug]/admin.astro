@@ -1,10 +1,10 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import Header from '../../react/Header';
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../react/Header';
 import { getStore } from '~/utils/blob-store';
 import type { Gallery, GalleryTile } from '~/types/gallery';
 import Hero from '~/components/Hero.astro';
-import AnimatedImage from '~/components/AnimatedImage.astro';
+import { ResponsiveImage } from '~/react/ResponsiveImage';
 
 export const prerender = false;
 
@@ -18,32 +18,30 @@ if (!adminSecret || adminSecret !== import.meta.env.ADMIN_SECRET) {
   return Astro.redirect('/');
 }
 
-// Get all galleries to check for used images
+const { slug } = Astro.params;
+if (!slug) {
+  return Astro.redirect('/admin/galleries');
+}
+
+// Get gallery data
 const galleriesStore = getStore('galleries');
-const { blobs: galleryBlobs } = await galleriesStore.list({
-  prefix: 'gallery/',
-});
-
-// Get all uploaded images
-const uploadsStore = getStore('file-uploads');
-const { blobs: uploadBlobs } = await uploadsStore.list();
-
-// Parse gallery data to get used images
-const galleries = await Promise.all(
-  galleryBlobs.map(async (blob: { key: string }) => {
-    const data = await galleriesStore.get(blob.key, { type: 'json' }) as Gallery;
-    return data;
-  })
-);
+const gallery = await galleriesStore.get(`gallery/${slug}`, { type: 'json' }) as Gallery;
+if (!gallery) {
+  return Astro.redirect('/admin/galleries');
+}
 
 // Create a set of all used image URLs
 const usedImageUrls = new Set<string>();
-galleries.forEach((gallery: Gallery) => {
-  gallery.layout.forEach((tile: GalleryTile) => {
-    if (tile.imageUrl) {
-      usedImageUrls.add(tile.imageUrl);
-    }
-  });
+gallery.layout.forEach((tile: GalleryTile) => {
+  if (tile.imageUrl) {
+    usedImageUrls.add(tile.imageUrl);
+  }
+});
+
+// Get all uploaded images for this gallery
+const uploadsStore = getStore('file-uploads');
+const { blobs: uploadBlobs } = await uploadsStore.list({
+  prefix: `${slug}/`,
 });
 
 // Process uploads to identify unused images
@@ -59,36 +57,78 @@ interface UploadWithStatus {
   isUsed: boolean;
 }
 
-const uploads = await Promise.all(
-  uploadBlobs.map(async (blob: { key: string; lastModified: number; metadata: any }) => {
-    const isUsed = usedImageUrls.has(blob.key);
-    return {
-      ...blob,
-      isUsed
-    } as UploadWithStatus;
-  })
-);
+// Process uploads in batches to avoid connection timeouts
+const BATCH_SIZE = 5;
+const uploads: UploadWithStatus[] = [];
+
+for (let i = 0; i < uploadBlobs.length; i += BATCH_SIZE) {
+  const batch = uploadBlobs.slice(i, i + BATCH_SIZE);
+  const batchResults = await Promise.all(
+    batch.map(async (blob) => {
+      const isUsed = usedImageUrls.has(blob.key);
+      try {
+        const rawMetadata = await uploadsStore.getMetadata(blob.key);
+        let metadata;
+        if (typeof rawMetadata === 'string') {
+          try {
+            metadata = JSON.parse(rawMetadata);
+          } catch (e) {
+            metadata = null;
+          }
+        } else {
+          metadata = rawMetadata;
+        }
+        const defaultMetadata = {
+          slug: blob.key.split('/')[0],
+          name: blob.key.split('/').pop() || '',
+          type: 'image/jpeg',
+          size: 0
+        };
+        return {
+          key: blob.key,
+          lastModified: Date.now(),
+          metadata: metadata || defaultMetadata,
+          isUsed
+        } as UploadWithStatus;
+      } catch (error) {
+        console.error(`Error fetching metadata for ${blob.key}:`, error);
+        return {
+          key: blob.key,
+          lastModified: Date.now(),
+          metadata: {
+            slug: blob.key.split('/')[0],
+            name: blob.key.split('/').pop() || '',
+            type: 'image/jpeg',
+            size: 0
+          },
+          isUsed
+        } as UploadWithStatus;
+      }
+    })
+  );
+  uploads.push(...batchResults);
+}
 
 // Sort uploads by last modified date
-uploads.sort((a: UploadWithStatus, b: UploadWithStatus) => b.lastModified - a.lastModified);
+uploads.sort((a, b) => b.lastModified - a.lastModified);
 
 // Count unused images
 const unusedCount = uploads.filter(upload => !upload.isUsed).length;
 ---
 
-<Layout title="Admin - Uploads" id="admin">
+<Layout title={`Admin - ${gallery.title} Uploads`} id="admin">
   <Header client:load />
-  <Hero title="Admin - Uploads" />
+  <Hero title={`${gallery.title} - Uploads`} />
   <div class="container mx-auto px-4 py-8">
     <div class="mb-8 flex justify-between items-center">
-      <a href="/admin" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-        Back to Admin
+      <a href="/admin/galleries" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+        Back to Galleries
       </a>
       {unusedCount > 0 && (
         <button
           class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
           onclick={`if(confirm('Are you sure you want to delete all ${unusedCount} unused images? This action cannot be undone.')) {
-            fetch('/api/delete-unused-uploads', { method: 'DELETE' })
+            fetch('/api/delete-unused-uploads?slug=${slug}', { method: 'DELETE' })
               .then(response => response.json())
               .then(data => {
                 if (data.success) {
@@ -108,8 +148,11 @@ const unusedCount = uploads.filter(upload => !upload.isUsed).length;
       {uploads.map((upload: UploadWithStatus) => (
         <div class={`bg-white shadow rounded-lg overflow-hidden ${!upload.isUsed ? 'border-2 border-red-500' : ''}`}>
           <div class="relative aspect-square">
-            <AnimatedImage
-              src={upload.key as any}
+            <ResponsiveImage
+              id={upload.key}
+              w={300}
+              h={300}
+              site={import.meta.env.PUBLIC_URL}
               alt={upload.metadata?.name}
             />
             {!upload.isUsed && (
@@ -122,9 +165,6 @@ const unusedCount = uploads.filter(upload => !upload.isUsed).length;
             <h2 class="text-lg font-semibold mb-2 truncate" title={upload.metadata?.name}>
               {upload.metadata?.name}
             </h2>
-            <p class="text-gray-600 text-sm mb-1 truncate" title={upload.metadata?.slug}>
-              Gallery: {upload.metadata?.slug}
-            </p>
             <p class="text-gray-500 text-sm mb-1">
               {(upload.metadata?.size / 1024 / 1024).toFixed(2)} MB
             </p>

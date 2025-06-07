@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Image } from "@unpic/react";
 import TypographyWrapper from './TypographyWrapper';
+import { ResponsiveImage } from './ResponsiveImage';
 
 interface Props {
   image?: string;
@@ -28,14 +29,14 @@ export default function Tile({
       data-id={id}
     >
       {image && (
-        
-           <Image
-            src={`${import.meta.env.PUBLIC_URL}/api/get-raw-image/?key=${image}`}
-            layout="fullWidth"
+          <ResponsiveImage
+            id={image}
+            w={1000}
             alt={imageAlt}
-            fallback={import.meta.env.PUBLIC_LOCAL ? "astro" : "netlify"}
-            className="w-full h-full object-cover"
+            h={1000}
+            site={import.meta.env.PUBLIC_URL}
           />
+           
         
       )}
       {text && (
