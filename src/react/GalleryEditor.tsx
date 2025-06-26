@@ -166,7 +166,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
   // Update container width and row height on window resize
   useEffect(() => {
     const updateWidth = () => {
-      const width = window.innerWidth; // 32px for padding
+      const width = window.innerWidth - 100; // 50px for padding
       setContainerWidth(width);
       // Calculate row height to make tiles square (accounting for margins)
       const rowHeight = (width) / 12; // 11 gaps of 16px between 12 columns
@@ -774,7 +774,7 @@ export function GalleryEditorContent({ slug, gallery: initialGallery }: Props) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full px-[50px]">
       <div 
         className="w-full min-h-[500px] relative" 
         onClickCapture={handleContainerClick} 

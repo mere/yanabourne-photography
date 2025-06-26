@@ -18,6 +18,7 @@ export function GalleryAdmin({
 }: GalleryAdminProps) {
   const [showJsonEditor, setShowJsonEditor] = useState(false);
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const [generatedThumbnails, setGeneratedThumbnails] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "info";
@@ -27,15 +28,41 @@ export function GalleryAdmin({
     setLoadingStates((prev) => ({ ...prev, [key]: isLoading }));
   };
 
+  // Calculate how many images need thumbnails
+  const imagesNeedingThumbnails = gallery.layout
+    .map((tile) => {
+      const image = uploadsWithStatus.find((u) => u.key === tile.imageUrl);
+      const thumbKey = image ? `${gallery.slug}/thumb/${image.name}` : null;
+      const thumb = thumbKey
+        ? uploadsWithStatus.find((u) => u.key === thumbKey)
+        : null;
+      const needsThumbnail =
+        !thumb ||
+        thumb.metadata?.metadata?.tileW !== tile.w ||
+        thumb.metadata?.metadata?.tileH !== tile.h;
+      return needsThumbnail ? tile.imageUrl : null;
+    })
+    .filter((key): key is string => key !== null);
+
   const generateThumbnail = async (imageKey: string, shouldReload = true) => {
     setLoading(imageKey, true);
     try {
+      // Find the tile that uses this image
+      const tile = gallery.layout.find((t) => t.imageUrl === imageKey);
+      if (!tile) {
+        throw new Error("Image not found in gallery layout");
+      }
+
       const response = await fetch("/api/update-thumbnail", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ key: imageKey }),
+        body: JSON.stringify({ 
+          key: imageKey,
+          tileW: tile.w,
+          tileH: tile.h
+        }),
       });
 
       if (!response.ok) {
@@ -51,6 +78,9 @@ export function GalleryAdmin({
       setToast({ message: "Thumbnail generated successfully", type: "success" });
       if (shouldReload) {
         window.location.reload();
+      } else {
+        // Add to local state so the count updates immediately
+        setGeneratedThumbnails(prev => new Set([...prev, imageKey]));
       }
     } catch (error) {
       console.error("Error generating thumbnail:", error);
@@ -66,7 +96,7 @@ export function GalleryAdmin({
   const generateAllThumbnails = async () => {
     if (
       !confirm(
-        "Are you sure you want to generate thumbnails for all images? This may take a while."
+        "Are you sure you want to generate thumbnails for images that need them? This may take a while."
       )
     ) {
       return;
@@ -77,22 +107,6 @@ export function GalleryAdmin({
     let failureCount = 0;
 
     try {
-      const imagesNeedingThumbnails = gallery.layout
-        .map((tile) => {
-          const image = uploadsWithStatus.find((u) => u.key === tile.imageUrl);
-          const thumbKey = image ? `${gallery.slug}/thumb/${image.name}` : null;
-          const thumb = thumbKey
-            ? uploadsWithStatus.find((u) => u.key === thumbKey)
-            : null;
-          const needsThumbnail =
-            !thumb ||
-            thumb.metadata?.tileW !== tile.w ||
-            thumb.metadata?.tileH !== tile.h;
-          return needsThumbnail ? tile.imageUrl : null;
-        })
-        .filter((key): key is string => key !== null);
-
-      // Process thumbnails sequentially with a delay
       for (const imageKey of imagesNeedingThumbnails) {
         try {
           await generateThumbnail(imageKey, false); // Don't reload after each thumbnail
@@ -232,7 +246,7 @@ export function GalleryAdmin({
             disabled={loadingStates["allThumbnails"]}
           >
             {loadingStates["allThumbnails"] && <LoadingSpinner />}
-            Generate All Thumbnails
+            Generate All Thumbnails ({imagesNeedingThumbnails.length})
           </button>
           <button
             className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
@@ -282,6 +296,9 @@ export function GalleryAdmin({
                   Size
                 </th>
                 <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
+                  Thumbnail Status
+                </th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
                   Description
                 </th>
                 <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">
@@ -302,8 +319,8 @@ export function GalleryAdmin({
                   : null;
                 const needsThumbnail =
                   !thumb ||
-                  thumb.metadata?.tileW !== tile.w ||
-                  thumb.metadata?.tileH !== tile.h;
+                  thumb.metadata?.metadata?.tileW !== tile.w ||
+                  thumb.metadata?.metadata?.tileH !== tile.h;
 
                 return (
                   <tr key={tile.id}>
@@ -336,6 +353,17 @@ export function GalleryAdmin({
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
                       {tile.w}x{tile.h}
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-900">
+                      {!thumb ? (
+                        <span className="text-red-600">No thumbnail</span>
+                      ) : thumb.metadata?.metadata?.tileW !== tile.w || thumb.metadata?.metadata?.tileH !== tile.h ? (
+                        <span className="text-orange-600">
+                          Wrong size: {thumb.metadata?.metadata?.tileW || 'undefined'}x{thumb.metadata?.metadata?.tileH || 'undefined'} (needs {tile.w}x{tile.h})
+                        </span>
+                      ) : (
+                        <span className="text-green-600">✓ Correct size</span>
+                      )}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">
                       {tile.description || "-"}
