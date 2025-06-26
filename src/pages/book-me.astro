@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Header from '../react/Header';
+import Tiles from "../components/Tiles.astro";
+import { getStore } from "~/utils/blob-store";
+
+export const prerender = false;
+
+const store = getStore('galleries');
+const key = `gallery/book-me`;
+const gallery = await store.get(key, { type: 'json' });
+
+---
+
+<Layout title={gallery.title} id={gallery.slug}>
+  <Header client:load />
+  <Hero title={gallery.title} />
+  <Tiles gallery={gallery} class="responsive-grid" />
+</Layout>

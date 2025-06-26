@@ -1,5 +1,5 @@
 import Logo from "./Logo";
-import { HomeIcon, AboutIcon, ContactIcon } from "./NavIcons";
+import { HomeIcon, AboutIcon, ContactIcon, BookMeIcon } from "./NavIcons";
 
 const Header = () => {
   const pathname = 'TODO'
@@ -7,6 +7,7 @@ const Header = () => {
   const navItems = [
     { name: "Home", path: "/", icon: HomeIcon },
     { name: "About", path: "/about", icon: AboutIcon },
+    { name: "Book me", path: "/book-me", icon: BookMeIcon },
     { name: "Contact", path: "/contact", icon: ContactIcon },
   ];
 
