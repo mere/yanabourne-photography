@@ -1,12 +1,22 @@
 'use client';
 
 import Signature from "./signature";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function ContactForm() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [prefilledMessage, setPrefilledMessage] = useState<string>("");
   
+
+  useEffect(() => {
+    // Get the message parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    if (message) {
+      setPrefilledMessage(decodeURIComponent(message));
+    }
+  }, []);
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -111,6 +121,8 @@ export function ContactForm() {
                         placeholder="Message"
                         required={true}
                         data-sb-field-path="form.message.placeholder"
+                        value={prefilledMessage}
+                        onChange={(e) => setPrefilledMessage(e.target.value)}
                       ></textarea>
                     </div>
                   </div>
@@ -119,7 +131,7 @@ export function ContactForm() {
                       <button
                         type="submit"
                         disabled={status === 'pending'}
-                        className="btn text-white bg-blue-600 hover:bg-blue-700 w-full disabled:opacity-50"
+                        className="p-2 rounded-sm text-white bg-blue-600 hover:bg-blue-700 w-full disabled:opacity-50"
                       >
                         {status === 'pending' ? "Sending..." : "Send"}
                       </button>

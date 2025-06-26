@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Header from '../react/Header';
-import { getStore } from "~/utils/blob-store";
 import {ContactForm} from "../react/contact";
 
 export const prerender = true;
@@ -12,5 +11,5 @@ export const prerender = true;
 <Layout title="Contact" id="contact">
   <Header client:load />
   <Hero title="Contact" />
-  <ContactForm />
+  <ContactForm client:load />
 </Layout>

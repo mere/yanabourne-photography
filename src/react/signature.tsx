@@ -9,7 +9,7 @@ export default function Signature({
   return (
     <a
       href="/" 
-      className={`block text-white transition duration-150 ease-in-out font-the-nautigal text-2xl ${className}`} 
+      className={`block no-underline text-white transition duration-150 ease-in-out font-the-nautigal text-2xl ${className}`} 
     >
       {title}
     </a>

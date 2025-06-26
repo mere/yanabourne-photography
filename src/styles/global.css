@@ -8,6 +8,7 @@
   --font-the-nautigal: "The Nautigal", cursive;
 }
 
+@source inline('text-blue-500');
 
 .prose h1 {
   font-size: 2.25rem;

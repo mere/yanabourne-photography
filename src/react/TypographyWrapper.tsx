@@ -7,7 +7,7 @@ interface Props {
 
 export default function TypographyWrapper({ html, className = '' }: Props) {
   return (
-    <div className={`prose prose-lg font-karla font-light max-w-none px-4 ${className}`}>
+    <div className={`prose prose-lg font-karla font-light max-w-none ${className}`}>
       <div dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   );
