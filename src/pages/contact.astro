@@ -7,14 +7,10 @@ import {ContactForm} from "../react/contact";
 
 export const prerender = true;
 
-const store = getStore('galleries');
-const key = `gallery/home`;
-const gallery = await store.get(key, { type: 'json' });
-
 ---
 
-<Layout title={gallery.title} id={gallery.slug}>
+<Layout title="Contact" id="contact">
   <Header client:load />
-  <Hero title={gallery.title} />
+  <Hero title="Contact" />
   <ContactForm />
 </Layout>
