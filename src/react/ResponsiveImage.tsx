@@ -24,7 +24,7 @@ export function ResponsiveImage({ id, w, h, site, alt, thumbUrl }: Props) {
       <img
         src={src}
         alt={alt}
-        className={`w-full h-full object-cover ${thumbUrl && !thumbError ? 'border-2 border-green-500' : ''}`}
+        className={`w-full h-full object-cover`}
         onError={() => {
           if (thumbUrl) {
             setThumbError(true);
