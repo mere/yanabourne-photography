@@ -46,9 +46,9 @@ for (const blob of uploads.blobs) {
           // If y is the same, sort by x coordinate
           return a.x - b.x;
         })
-      .map((tile: { id: string; imageUrl: string; x: number; y: number; w: number; h: number; description?: string; }) => (
+      .map((tile: { id: string; imageUrl: string; x: number; y: number; w: number; h: number; description?: string; },i) => (
         <div
-          class={`tile-wrapper ${tile.y > 6 ? 'animate-start' : ''}`}
+          class={`tile-wrapper ${i>0 ? 'animate-start' : ''}`}
           style={`
             grid-column: ${tile.x + 1} / span ${tile.w};
             grid-row: ${tile.y + 1} / span ${tile.h};
@@ -97,7 +97,7 @@ for (const blob of uploads.blobs) {
     @apply transition-all duration-600;
 
     &.animate-start {
-      @apply translate-y-8 scale-95;
+      @apply scale-95;
     }
 
     &.animate {
