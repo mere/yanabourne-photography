@@ -42,10 +42,7 @@ export function ContactForm() {
                   method="POST"
                   className="w-full"
                   data-netlify="true"
-                  netlify="true"
-                  action="/"
                 >
-                  <input type="hidden" name="form-name" value="contact-form" />
                   <div className="flex flex-wrap -mx-3 mb-4">
                     <div className="w-full px-3">
                       <label
