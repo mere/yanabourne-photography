@@ -58,7 +58,8 @@ const SIZE_CONFIG = {
   },
 } as const;
 
-const LOGO_COLOR = "black";
+const LOGO_COLOR = "#EEEEEE";
+const LOGO_DOT_COLOR = "#EE0000";
 
 const Logo = ({ size = "S", fixed = false }: LogoProps) => {
   const [rotation, setRotation] = useState(0);
@@ -112,7 +113,7 @@ const Logo = ({ size = "S", fixed = false }: LogoProps) => {
             transform: `rotate(${rotation}deg)`,
             transition: "transform 0.05s ease-out",
           }}
-          className="z-9995 _mix-blend-difference"
+          className="z-9995 mix-blend-difference"
         >
           <defs>
             <Arc
@@ -150,7 +151,30 @@ const Logo = ({ size = "S", fixed = false }: LogoProps) => {
             radius={config.radius + 5}
             angle={160}
             r={config.strokeWidth / 2.5}
-            fill="#ee0000"
+            fill={LOGO_DOT_COLOR}
+          />
+        </svg>
+        <svg
+          width={config.main}
+          height={config.main}
+          viewBox={`${-config.main / 2 - 15} ${-config.main / 2 - 15} ${
+            config.main + 30
+          } ${config.main + 30}`}
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            position: fixed ? "fixed" : "absolute",
+            top: 0,
+            left: 0,
+            transform: `rotate(${rotation}deg)`,
+            transition: "transform 0.05s ease-out",
+          }}
+          className="z-9999 "
+        >
+          <Circle
+            radius={config.radius + 5}
+            angle={160}
+            r={config.strokeWidth / 2.5}
+            fill={LOGO_DOT_COLOR}
           />
         </svg>
       </a>
