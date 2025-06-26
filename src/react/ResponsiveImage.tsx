@@ -1,26 +1,47 @@
-import type { FC } from 'react';
+import { useState } from 'react';
 
-interface ResponsiveImageProps {
+interface Props {
   id: string;
   w: number;
   h: number;
   site: string;
   alt: string;
+  thumbUrl?: string;
 }
 
+export function ResponsiveImage({ id, w, h, site, alt, thumbUrl }: Props) {
+  const [thumbError, setThumbError] = useState(false);
 
-export const ResponsiveImage: FC<ResponsiveImageProps> = ({ id, w, h=w*5, site, alt }) => {
+  const src = thumbUrl && !thumbError
+    ? `${site}/api/get-raw-image?key=${encodeURIComponent(thumbUrl)}`
+    : (() => {
+        const originalSrc = encodeURIComponent(`${site}/api/get-raw-image?key=${id}`);
+        return `${site}/.netlify/images?w=${w}&h=${h}&fit=contain&url=${originalSrc}`;
+      })();
 
-    const originalSrc = encodeURIComponent(`${site}/api/get-raw-image?key=${id}`);
-    //const responsiveUrl = `${site}/_image?w=${w}&h=${h}&fit=contain&href=${originalSrc}`
-    const responsiveUrl = `${site}/.netlify/images?w=${w}&h=${h}&fit=contain&url=${originalSrc}`
   return (
-    <img
-      src={responsiveUrl}
-      alt={alt}
-      className="w-full h-full object-cover"
-      loading="lazy"
-    />
+    <div className="relative w-full h-full">
+      <img
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover ${thumbUrl && !thumbError ? 'border-2 border-green-500' : ''}`}
+        onError={() => {
+          if (thumbUrl) {
+            setThumbError(true);
+          }
+        }}
+      />
+      {thumbUrl && !thumbError && (
+        <div className="absolute top-1 right-1 bg-green-500 text-white text-xs px-1 rounded">
+          thumb
+        </div>
+      )}
+      {thumbUrl && thumbError && (
+        <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded">
+          ❌ No Thumb
+        </div>
+      )}
+    </div>
   );
-};
+}
 

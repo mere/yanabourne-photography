@@ -1,25 +1,18 @@
 import { useState, useEffect } from 'react';
 import type { Gallery } from '../types/gallery';
 
-export default function JsonEditor() {
-  const [isOpen, setIsOpen] = useState(false);
+interface JsonEditorProps {
+  initialData: Gallery;
+  onClose: () => void;
+}
+
+export default function JsonEditor({ initialData, onClose }: JsonEditorProps) {
   const [jsonText, setJsonText] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [currentGallery, setCurrentGallery] = useState<Gallery | null>(null);
 
   useEffect(() => {
-    const handleOpenEditor = (event: CustomEvent) => {
-      const gallery = event.detail as Gallery;
-      setCurrentGallery(gallery);
-      setJsonText(JSON.stringify(gallery, null, 2));
-      setIsOpen(true);
-    };
-
-    window.addEventListener('openJsonEditor', handleOpenEditor as EventListener);
-    return () => {
-      window.removeEventListener('openJsonEditor', handleOpenEditor as EventListener);
-    };
-  }, []);
+    setJsonText(JSON.stringify(initialData, null, 2));
+  }, [initialData]);
 
   const handleSave = async () => {
     try {
@@ -44,8 +37,6 @@ export default function JsonEditor() {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-[800px] max-h-[90vh] flex flex-col">
@@ -63,7 +54,7 @@ export default function JsonEditor() {
         )}
         <div className="flex justify-end gap-2">
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={onClose}
             className="px-4 py-2 text-gray-600 hover:text-gray-800"
           >
             Cancel

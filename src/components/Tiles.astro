@@ -3,6 +3,8 @@ import Tile from "./Tile.astro";
 import convex from "../lib/convex";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "convex/_generated/dataModel";
+import { getStore } from "~/utils/blob-store";
+import type { ListResult } from "~/types/upload";
 
 interface Props {
   gallery: Doc<"galleries">;
@@ -10,6 +12,23 @@ interface Props {
 }
 
 const { gallery, class: className } = Astro.props;
+
+// Get all uploaded images for this gallery
+const uploadsStore = getStore("file-uploads");
+const uploads = await uploadsStore.list({
+  prefix: `${gallery.slug}/`,
+}) as ListResult;
+
+// Create a map of image URLs to their thumbnail URLs
+const thumbMap = new Map<string, string>();
+for (const blob of uploads.blobs) {
+  if (blob.key.includes('/thumb/')) {
+    // Extract the original image name from the thumbnail path
+    const originalName = blob.key.split('/thumb/')[1];
+    const originalKey = `${gallery.slug}/${originalName}`;
+    thumbMap.set(originalKey, blob.key);
+  }
+}
 
 console.log(gallery.layout);
 ---
@@ -19,7 +38,7 @@ console.log(gallery.layout);
   <!-- {gallery.description && <p class="gallery-description">{gallery.description}</p>} -->
   <div class={`tiles-grid ${className}`}>
     {
-      gallery.layout.map((tile) => (
+      gallery.layout.map((tile: { id: string; imageUrl: string; x: number; y: number; w: number; h: number; description?: string; }) => (
         <div
           class="tile-wrapper"
           style={`
@@ -29,6 +48,7 @@ console.log(gallery.layout);
         >
           <Tile
             tile={tile}
+            thumbUrl={tile.imageUrl ? thumbMap.get(tile.imageUrl) : undefined}
           />
         </div>
       ))

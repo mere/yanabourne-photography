@@ -15,9 +15,10 @@ interface Props {
     h: number
   }
   className?: string;
+  thumbUrl?: string;
 }
 
-const { tile, className='' } = Astro.props;
+const { tile, className='', thumbUrl } = Astro.props;
 
 const Wrapper = tile.link ? "a" : "div";
 const wrapperProps = tile.link ? { href: tile.link } : {};
@@ -35,6 +36,7 @@ const wrapperProps = tile.link ? { href: tile.link } : {};
       h={tile.h * 300}
       site={import.meta.env.PUBLIC_URL}
       alt={tile.altText}
+      thumbUrl={thumbUrl}
     />
   )}
   {tile.imageUrl && tile.description && (

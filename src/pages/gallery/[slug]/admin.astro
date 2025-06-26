@@ -1,195 +1,145 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import Header from '../../../react/Header';
-import { getStore } from '~/utils/blob-store';
-import type { Gallery, GalleryTile } from '~/types/gallery';
-import Hero from '~/components/Hero.astro';
-import { ResponsiveImage } from '~/react/ResponsiveImage';
+import Layout from "~/layouts/Layout.astro";
+import Header from "../../../react/Header";
+import { getStore } from "~/utils/blob-store";
+import type { Gallery, GalleryTile } from "~/types/gallery";
+import Hero from "~/components/Hero.astro";
+import type { UploadWithStatus, ListResult } from "~/types/upload";
+import { GalleryAdmin } from "~/react/GalleryAdmin";
 
 export const prerender = false;
 
 // Get admin secret from cookie
-const cookies = Astro.request.headers.get('cookie')?.split(';') || [];
-const adminSecretCookie = cookies.find(cookie => cookie.trim().startsWith('admin_secret='));
-const adminSecret = adminSecretCookie ? adminSecretCookie.split('=')[1] : null;
+const cookies = Astro.request.headers.get("cookie")?.split(";") || [];
+const adminSecretCookie = cookies.find((cookie) =>
+  cookie.trim().startsWith("admin_secret=")
+);
+const adminSecret = adminSecretCookie ? adminSecretCookie.split("=")[1] : null;
 
 // Check if user is authorized
 if (!adminSecret || adminSecret !== import.meta.env.ADMIN_SECRET) {
-  return Astro.redirect('/');
+  return Astro.redirect("/");
 }
 
+console.log(Astro.params);
 const { slug } = Astro.params;
 if (!slug) {
-  return Astro.redirect('/admin/galleries');
+  return Astro.redirect("/404");
 }
 
 // Get gallery data
-const galleriesStore = getStore('galleries');
-const gallery = await galleriesStore.get(`gallery/${slug}`, { type: 'json' }) as Gallery;
+const galleriesStore = getStore("galleries");
+const gallery = (await galleriesStore.get(`gallery/${slug}`, {
+  type: "json",
+})) as Gallery;
 if (!gallery) {
-  return Astro.redirect('/admin/galleries');
+  return Astro.redirect("/404");
 }
 
 // Create a set of all used image URLs
-const usedImageUrls = new Set<string>();
-gallery.layout.forEach((tile: GalleryTile) => {
-  if (tile.imageUrl) {
-    usedImageUrls.add(tile.imageUrl);
-  }
-});
+const usedImageUrls = new Set<string>(
+  gallery.layout.map((tile: GalleryTile) => tile.imageUrl)
+);
+
+console.log("Used image URLs:", Array.from(usedImageUrls));
 
 // Get all uploaded images for this gallery
-const uploadsStore = getStore('file-uploads');
-const { blobs: uploadBlobs } = await uploadsStore.list({
-  prefix: `${slug}/`,
-});
+const uploadsStore = getStore("file-uploads");
+const uploads = (await uploadsStore.list({
+  prefix: `${gallery.slug}/`,
+})) as ListResult;
 
-// Process uploads to identify unused images
-interface UploadWithStatus {
-  key: string;
-  lastModified: number;
-  metadata: {
-    slug: string;
-    name: string;
-    type: string;
-    size: number;
-  };
-  isUsed: boolean;
-}
+console.log(
+  "All uploads:",
+  uploads.blobs.map((b) => b.key)
+);
 
-// Process uploads in batches to avoid connection timeouts
-const BATCH_SIZE = 5;
-const uploads: UploadWithStatus[] = [];
+// Process uploads in smaller batches to avoid connection timeouts
+const batchSize = 10;
+const uploadsWithStatus: UploadWithStatus[] = [];
 
-for (let i = 0; i < uploadBlobs.length; i += BATCH_SIZE) {
-  const batch = uploadBlobs.slice(i, i + BATCH_SIZE);
-  const batchResults = await Promise.all(
-    batch.map(async (blob) => {
-      const isUsed = usedImageUrls.has(blob.key);
-      try {
-        const rawMetadata = await uploadsStore.getMetadata(blob.key);
-        let metadata;
-        if (typeof rawMetadata === 'string') {
-          try {
-            metadata = JSON.parse(rawMetadata);
-          } catch (e) {
-            metadata = null;
-          }
-        } else {
-          metadata = rawMetadata;
-        }
-        const defaultMetadata = {
-          slug: blob.key.split('/')[0],
-          name: blob.key.split('/').pop() || '',
-          type: 'image/jpeg',
-          size: 0
-        };
-        return {
-          key: blob.key,
-          lastModified: Date.now(),
-          metadata: metadata || defaultMetadata,
-          isUsed
-        } as UploadWithStatus;
-      } catch (error) {
-        console.error(`Error fetching metadata for ${blob.key}:`, error);
-        return {
-          key: blob.key,
-          lastModified: Date.now(),
-          metadata: {
-            slug: blob.key.split('/')[0],
-            name: blob.key.split('/').pop() || '',
-            type: 'image/jpeg',
-            size: 0
-          },
-          isUsed
-        } as UploadWithStatus;
+for (let i = 0; i < uploads.blobs.length; i += batchSize) {
+  const batch = uploads.blobs.slice(i, i + batchSize);
+  const batchPromises = batch.map(
+    async (blob: { key: string; metadata?: any }) => {
+      const rawMetadata = await uploadsStore.getMetadata(blob.key);
+      console.log("Raw metadata for", blob.key, ":", rawMetadata);
+
+      const metadata =
+        typeof rawMetadata === "string" ? JSON.parse(rawMetadata) : rawMetadata;
+      console.log("Parsed metadata for", blob.key, ":", metadata);
+
+      const defaultMetadata = {
+        size: 0,
+        lastModified: new Date(0),
+        type: "unknown",
+      };
+      const validMetadata = metadata || defaultMetadata;
+      console.log("Valid metadata for", blob.key, ":", validMetadata);
+
+      // Check if this is a thumbnail by both metadata and path
+      const isThumbnail =
+        validMetadata.isThumbnail || blob.key.includes("/thumb/");
+      console.log("Is thumbnail check for", blob.key, ":", {
+        fromMetadata: validMetadata.isThumbnail,
+        fromPath: blob.key.includes("/thumb/"),
+        final: isThumbnail,
+      });
+
+      // If it's a thumbnail, get the original image name and check if it's used
+      let isUsed = usedImageUrls.has(blob.key);
+      if (isThumbnail) {
+        const originalName = blob.key.replace("/thumb/", "/");
+        isUsed = usedImageUrls.has(originalName);
+        console.log("Thumbnail check:", {
+          thumbnail: blob.key,
+          original: originalName,
+          isUsed,
+          usedUrls: Array.from(usedImageUrls),
+        });
       }
-    })
+
+      return {
+        key: blob.key,
+        name: blob.key.split("/").pop() || "",
+        size: validMetadata.size || 0,
+        lastModified: validMetadata.lastModified
+          ? new Date(validMetadata.lastModified)
+          : new Date(0),
+        type: validMetadata.type || "unknown",
+        isUsed,
+        isThumbnail,
+        metadata: validMetadata,
+      };
+    }
   );
-  uploads.push(...batchResults);
+
+  const batchResults = await Promise.all(batchPromises);
+  uploadsWithStatus.push(...batchResults);
 }
 
-// Sort uploads by last modified date
-uploads.sort((a, b) => b.lastModified - a.lastModified);
+// Filter out thumbnails and used images, sort by last modified
+const unusedImages = uploadsWithStatus
+  .filter((upload) => !upload.isThumbnail && !upload.isUsed)
+  .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
 
-// Count unused images
-const unusedCount = uploads.filter(upload => !upload.isUsed).length;
+console.log(
+  "Unused images:",
+  unusedImages.map((u) => ({
+    key: u.key,
+    isThumbnail: u.isThumbnail,
+    isUsed: u.isUsed,
+  }))
+);
 ---
 
-<Layout title={`Admin - ${gallery.title} Uploads`} id="admin">
+<Layout title={`Admin - ${gallery.title}`} id="admin">
   <Header client:load />
-  <Hero title={`${gallery.title} - Uploads`} />
-  <div class="container mx-auto px-4 py-8">
-    <div class="mb-8 flex justify-between items-center">
-      <a href="/admin/galleries" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-        Back to Galleries
-      </a>
-      {unusedCount > 0 && (
-        <button
-          class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-          onclick={`if(confirm('Are you sure you want to delete all ${unusedCount} unused images? This action cannot be undone.')) {
-            fetch('/api/delete-unused-uploads?slug=${slug}', { method: 'DELETE' })
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  window.location.reload();
-                } else {
-                  alert('Failed to delete unused images');
-                }
-              });
-          }`}
-        >
-          Delete All Unused ({unusedCount})
-        </button>
-      )}
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {uploads.map((upload: UploadWithStatus) => (
-        <div class={`bg-white shadow rounded-lg overflow-hidden ${!upload.isUsed ? 'border-2 border-red-500' : ''}`}>
-          <div class="relative aspect-square">
-            <ResponsiveImage
-              id={upload.key}
-              w={300}
-              h={300}
-              site={import.meta.env.PUBLIC_URL}
-              alt={upload.metadata?.name}
-            />
-            {!upload.isUsed && (
-              <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-sm">
-                Unused
-              </div>
-            )}
-          </div>
-          <div class="p-4">
-            <h2 class="text-lg font-semibold mb-2 truncate" title={upload.metadata?.name}>
-              {upload.metadata?.name}
-            </h2>
-            <p class="text-gray-500 text-sm mb-1">
-              {(upload.metadata?.size / 1024 / 1024).toFixed(2)} MB
-            </p>
-            <p class="text-gray-500 text-sm mb-3">
-              {new Date(upload.lastModified).toLocaleString()}
-            </p>
-            <button
-              class="w-full bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-              onclick={`if(confirm('Are you sure you want to delete this image?')) {
-                fetch('/api/delete-upload?key=${upload.key}', { method: 'DELETE' })
-                  .then(response => response.json())
-                  .then(data => {
-                    if (data.success) {
-                      window.location.reload();
-                    } else {
-                      alert('Failed to delete image');
-                    }
-                  });
-              }`}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</Layout> 
+  <Hero title={`Admin - ${gallery.title}`} />
+  <GalleryAdmin
+    client:only="react"
+    gallery={gallery}
+    uploadsWithStatus={uploadsWithStatus}
+    unusedImages={unusedImages}
+  />
+</Layout>
