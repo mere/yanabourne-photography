@@ -12,26 +12,28 @@ interface LogoProps {
 
 const SIZE_CONFIG = {
   S: {
-    main: 200,
-    radius: 65,
-    fontSize: 14,
-    strokeWidth: 10,
+    main: 160,
+    radius: 45,
+    fontSize: 11,
+    strokeWidth: 7,
+    dotRadius: 3,
     overlaySize: 107,
     textArc: {
       startDeg: 165,
-      endDeg: 400,
+      endDeg: 450,
     },
     dashArc: {
-      startDeg: 0,
+      startDeg: 25,
       endDeg: 152,
     },
   },
   M: {
-    main: 250,
-    radius: 85,
-    fontSize: 12,
-    strokeWidth: 8,
-    overlaySize: 150,
+    main: 200,
+    radius: 65,
+    fontSize: 14,
+    strokeWidth: 10,
+    dotRadius: 5,
+    overlaySize: 107,
     textArc: {
       startDeg: 165,
       endDeg: 400,
@@ -58,7 +60,7 @@ const SIZE_CONFIG = {
   },
 } as const;
 
-const LOGO_COLOR = "#EEEEEE";
+const LOGO_COLOR = "#000000";
 const LOGO_DOT_COLOR = "#EE0000";
 
 const Logo = ({ size = "S", fixed = false }: LogoProps) => {
@@ -113,7 +115,7 @@ const Logo = ({ size = "S", fixed = false }: LogoProps) => {
             transform: `rotate(${rotation}deg)`,
             transition: "transform 0.05s ease-out",
           }}
-          className="z-9995 mix-blend-difference"
+          className="z-9995 _mix-blend-difference"
         >
           <defs>
             <Arc
@@ -149,34 +151,12 @@ const Logo = ({ size = "S", fixed = false }: LogoProps) => {
 
           <Circle
             radius={config.radius + 5}
-            angle={160}
-            r={config.strokeWidth / 2.5}
+            angle={159}
+            r={config.dotRadius}
             fill={LOGO_DOT_COLOR}
           />
         </svg>
-        <svg
-          width={config.main}
-          height={config.main}
-          viewBox={`${-config.main / 2 - 15} ${-config.main / 2 - 15} ${
-            config.main + 30
-          } ${config.main + 30}`}
-          xmlns="http://www.w3.org/2000/svg"
-          style={{
-            position: fixed ? "fixed" : "absolute",
-            top: 0,
-            left: 0,
-            transform: `rotate(${rotation}deg)`,
-            transition: "transform 0.05s ease-out",
-          }}
-          className="z-9999 "
-        >
-          <Circle
-            radius={config.radius + 5}
-            angle={160}
-            r={config.strokeWidth / 2.5}
-            fill={LOGO_DOT_COLOR}
-          />
-        </svg>
+        
       </a>
 
       {/* <div

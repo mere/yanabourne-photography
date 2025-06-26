@@ -14,6 +14,40 @@ body {
   background-color: #FFFFFF;
 }
 
+
+
+/* Mobile Navigation */
+.mobile-nav-overlay {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.mobile-nav-panel {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Prevent body scroll when mobile nav is open */
+body.mobile-nav-open {
+  overflow: hidden;
+}
+
 .prose h1 {
   font-size: 2.25rem;
   margin-top: 0;
