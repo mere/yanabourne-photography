@@ -81,8 +81,8 @@ for (const blob of uploads.blobs) {
 
   .tiles-grid {
     display: grid;
-    grid-template-columns: repeat(12, calc((100vw - 32px) / 12));
-    grid-auto-rows: calc((100vw - 32px) / 12);
+    grid-template-columns: repeat(12, calc((100vw) / 12));
+    grid-auto-rows: calc((100vw) / 12);
   }
   @media (max-width: 768px) {
     .tiles-grid  {
@@ -92,7 +92,7 @@ for (const blob of uploads.blobs) {
   
 
   .tile-wrapper {
-    @apply w-full h-full pb-0.5 md:p-2 relative overflow-hidden;
+    @apply w-full h-full pb-0.5 md:p-0.5 relative overflow-hidden;
     @apply opacity-0;
     @apply transition-all duration-600;
 
