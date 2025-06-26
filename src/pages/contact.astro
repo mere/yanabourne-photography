@@ -2,10 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Header from '../react/Header';
-import Tiles from "../components/Tiles.astro";
 import { getStore } from "~/utils/blob-store";
+import {ContactForm} from "../react/contact";
 
-export const prerender = false;
+export const prerender = true;
 
 const store = getStore('galleries');
 const key = `gallery/home`;
@@ -16,5 +16,5 @@ const gallery = await store.get(key, { type: 'json' });
 <Layout title={gallery.title} id={gallery.slug}>
   <Header client:load />
   <Hero title={gallery.title} />
-  
+  <ContactForm />
 </Layout>
