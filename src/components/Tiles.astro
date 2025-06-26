@@ -37,7 +37,16 @@ for (const blob of uploads.blobs) {
   <!-- {gallery.description && <p class="gallery-description">{gallery.description}</p>} -->
   <div class={`tiles-grid ${className}`}>
     {
-      gallery.layout.map((tile: { id: string; imageUrl: string; x: number; y: number; w: number; h: number; description?: string; }) => (
+      gallery.layout
+      .sort((a: { x: number; y: number }, b: { x: number; y: number }) => {
+          // Sort by y coordinate first
+          if (a.y !== b.y) {
+            return a.y - b.y;
+          }
+          // If y is the same, sort by x coordinate
+          return a.x - b.x;
+        })
+      .map((tile: { id: string; imageUrl: string; x: number; y: number; w: number; h: number; description?: string; }) => (
         <div
           class={`tile-wrapper ${tile.y > 6 ? 'animate-start' : ''}`}
           style={`
