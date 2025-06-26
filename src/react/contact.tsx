@@ -59,7 +59,6 @@ export function ContactForm() {
                         className="form-input w-full bg-slate-800 border border-slate-700 focus:border-slate-600 rounded-sm px-4 py-3 text-white placeholder-slate-500"
                         placeholder="Name"
                         required={true}
-                        data-sb-field-path="form.name.placeholder"
                       />
                     </div>
                   </div>
@@ -68,7 +67,6 @@ export function ContactForm() {
                       <label
                         className="block text-left text-slate-300 text-sm font-medium mb-1"
                         htmlFor="email"
-                        data-sb-field-path="form.email.label"
                       >
                         Email <span className="text-red-600">*</span>
                       </label>
@@ -79,7 +77,6 @@ export function ContactForm() {
                         className="form-input w-full bg-slate-800 border border-slate-700 focus:border-slate-600 rounded-sm px-4 py-3 text-white placeholder-slate-500"
                         placeholder="Email"
                         required={true}
-                        data-sb-field-path="form.email.placeholder"
                       />
                     </div>
                   </div>

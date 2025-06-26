@@ -39,7 +39,7 @@ for (const blob of uploads.blobs) {
     {
       gallery.layout.map((tile: { id: string; imageUrl: string; x: number; y: number; w: number; h: number; description?: string; }) => (
         <div
-          class="tile-wrapper"
+          class={`tile-wrapper ${tile.y > 6 ? 'animate-start' : ''}`}
           style={`
             grid-column: ${tile.x + 1} / span ${tile.w};
             grid-row: ${tile.y + 1} / span ${tile.h};
@@ -84,12 +84,17 @@ for (const blob of uploads.blobs) {
 
   .tile-wrapper {
     @apply w-full h-full p-1 md:p-2 relative overflow-hidden;
-    @apply opacity-0 translate-y-5;
+    @apply opacity-0;
     @apply transition-all duration-600;
 
-    &.animate {
-      @apply opacity-100 translate-y-0;
+    &.animate-start {
+      @apply translate-y-8 scale-95;
     }
+
+    &.animate {
+      @apply opacity-100 translate-y-0 scale-100;
+    }
+
   }
 </style>
 
