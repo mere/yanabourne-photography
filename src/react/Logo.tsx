@@ -8,11 +8,12 @@ type LogoSize = "S" | "M" | "L";
 interface LogoProps {
   size?: LogoSize;
   fixed?: boolean;
+  noRotate?: boolean;
 }
 
 const SIZE_CONFIG = {
   S: {
-    main: 160,
+    main: 120,
     radius: 45,
     fontSize: 11,
     strokeWidth: 7,
@@ -63,7 +64,7 @@ const SIZE_CONFIG = {
 const LOGO_COLOR = "#000000";
 const LOGO_DOT_COLOR = "#EE0000";
 
-const Logo = ({ size = "S", fixed = false }: LogoProps) => {
+const Logo = ({ size = "S", fixed = false, noRotate = false }: LogoProps) => {
   const [rotation, setRotation] = useState(0);
   const targetRotation = useRef(0);
   const animationFrameId = useRef<number | undefined>(undefined);
@@ -71,6 +72,8 @@ const Logo = ({ size = "S", fixed = false }: LogoProps) => {
   const config = SIZE_CONFIG[size];
 
   useEffect(() => {
+    if (noRotate) return;
+    
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
       // Rotate 1 degree for every 10 pixels scrolled
@@ -110,8 +113,8 @@ const Logo = ({ size = "S", fixed = false }: LogoProps) => {
           xmlns="http://www.w3.org/2000/svg"
           style={{
             position: fixed ? "fixed" : "absolute",
-            top: 0,
-            left: 0,
+            top: fixed?20:0,
+            left: fixed?20:0,
             transform: `rotate(${rotation}deg)`,
             transition: "transform 0.05s ease-out",
           }}
