@@ -3,13 +3,17 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Header from '../react/Header';
 import {ContactForm} from "../react/contact";
+import { getStore } from "~/utils/blob-store";
 
 export const prerender = true;
-
+const store = getStore('galleries');
+const homegallery = await store.get(`gallery/home`, { type: 'json' });
+const links: {description: string, link: string}[] = homegallery.layout.filter((tile: any) => tile.link);
+const pathname = Astro.url.pathname;
 ---
 
 <Layout title="Contact" id="contact">
-  <Header client:load />
+  <Header client:load links={links} pathname={pathname} />
   <Hero title="Contact" />
   <ContactForm client:load />
 </Layout>

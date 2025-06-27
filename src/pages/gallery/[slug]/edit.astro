@@ -17,10 +17,13 @@ const store = getStore('galleries');
 const key = `gallery/${slug}`;
 const gallery = await store.get(key, { type: 'json' });
 
+const homegallery = await store.get(`gallery/home`, { type: 'json' });
+const links: {description: string, link: string}[] = homegallery.layout.filter((tile: any) => tile.link);
+const pathname = Astro.url.pathname;
 ---
 
 <Layout title="Edit Gallery" id={slug}>
-  <Header client:load />
+  <Header client:load links={links} pathname={pathname} />
   <Hero title={gallery?.title || 'Edit Gallery'} />
   <GalleryEditor client:only="react" gallery={gallery} slug={slug} />
 </Layout> 

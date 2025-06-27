@@ -42,10 +42,14 @@ const galleries = await Promise.all(
 
 // Sort galleries by last modified date
 galleries.sort((a: GalleryWithMetadata, b: GalleryWithMetadata) => b.lastModified - a.lastModified);
+
+const homegallery = await store.get(`gallery/home`, { type: 'json' });
+const links: {description: string, link: string}[] = homegallery.layout.filter((tile: any) => tile.link);
+const pathname = Astro.url.pathname;
 ---
 
 <Layout title="Admin - Galleries" id="admin">
-  <Header client:load />
+  <Header client:load links={links} pathname={pathname} />
   <Hero title="Admin" />
   <div class="container mx-auto px-4 py-8">
     <div class="mb-8">

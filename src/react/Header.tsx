@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import Logo from "./Logo";
 import { HomeIcon, AboutIcon, ContactIcon, BookMeIcon } from "./NavIcons";
 
-const Header = () => {
-  const pathname = "TODO";
+const Header = ({links, pathname}: {links: {description: string, link: string}[], pathname: string}) => {
+  
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [galleriesDropdownOpen, setGalleriesDropdownOpen] = useState(false);
 
   // Prevent body scroll when mobile nav is open
   useEffect(() => {
@@ -19,6 +20,21 @@ const Header = () => {
     };
   }, [mobileNavOpen]);
 
+  // Close galleries dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (galleriesDropdownOpen && !target.closest('.galleries-dropdown')) {
+        setGalleriesDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [galleriesDropdownOpen]);
+
   const handleOverlayClick = (e: React.MouseEvent) => {
     // Only close if clicking on the overlay background, not the panel
     if (e.target === e.currentTarget) {
@@ -32,6 +48,15 @@ const Header = () => {
     { name: "Book me", path: "/book-me", icon: BookMeIcon },
     { name: "Contact", path: "/contact", icon: ContactIcon },
   ];
+
+  // Add gallery links to navigation
+  const galleryNavItems = links.map(link => ({
+    name: link.description,
+    path: link.link,
+    icon: null
+  }));
+
+  const allNavItems = [...navItems, ...galleryNavItems];
 
   return (
     <header>
@@ -54,7 +79,58 @@ const Header = () => {
           </svg>
         </button>
         <nav className=" gap-4 hidden md:flex">
-          {navItems.map((item) => {
+          {/* Home */}
+          <a
+            href="/"
+            className={`text-gray-500 text-md relative before:content-[''] before:absolute before:block before:w-full before:h-[2px] before:bottom-0 before:left-0 before:bg-gray-500 before:scale-x-0 before:transition-transform before:duration-300 hover:before:scale-x-100
+                ${
+                  pathname === "/" ? "font-semibold" : ""
+                } flex items-center gap-1`}
+            title="Home"
+          >
+            <span className="hidden md:block">Home</span>
+          </a>
+          
+          {/* Galleries Dropdown */}
+          <div className="relative galleries-dropdown">
+            <button
+              onClick={() => setGalleriesDropdownOpen(!galleriesDropdownOpen)}
+              className={`text-gray-500 text-md relative before:content-[''] before:absolute before:block before:w-full before:h-[2px] before:bottom-0 before:left-0 before:bg-gray-500 before:scale-x-0 before:transition-transform before:duration-300 hover:before:scale-x-100 flex items-center gap-1 ${
+                galleryNavItems.some(item => pathname === item.path) ? "font-semibold" : ""
+              }`}
+            >
+              <span className="hidden md:block">Galleries</span>
+              {/* <svg
+                className={`w-4 h-4 transition-transform ${galleriesDropdownOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg> */}
+            </button>
+            
+            {/* Dropdown Menu */}
+            {galleriesDropdownOpen && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
+                {galleryNavItems.map((item) => (
+                  <a
+                    key={item.path}
+                    href={item.path}
+                    onClick={() => setGalleriesDropdownOpen(false)}
+                    className={`block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors ${
+                      pathname === item.path ? "bg-gray-100 font-semibold" : ""
+                    }`}
+                  >
+                    {item.name}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* About, Book me, Contact */}
+          {navItems.slice(1).map((item) => {
             
             return (
               <a
@@ -107,27 +183,59 @@ const Header = () => {
               </div>
               
               {/* Navigation items */}
-              <nav className="flex-1 p-6 ">
+              <nav className="flex-1 p-6 overflow-y-auto">
                 <ul className="space-y-6">
-                  {navItems.map((item) => {
-                    
-                    return (
-                      <li key={item.path}>
-                        <a
-                          href={item.path}
-                          onClick={() => setMobileNavOpen(false)}
-                          className={`flex items-center gap-3 text-lg font-medium transition-colors duration-200 ${
-                            pathname === item.path 
-                              ? "text-gray-900 border-l-4 border-gray-900 pl-4" 
-                              : "text-gray-600 hover:text-gray-900 hover:border-l-4 hover:border-gray-300 pl-4"
-                          }`}
-                        >
-                          
-                          <span>{item.name}</span>
-                        </a>
-                      </li>
-                    );
-                  })}
+                  {/* Quick Links Section */}
+                  <li>
+                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Quick Links</h3>
+                    <ul className="space-y-4">
+                      {navItems.map((item) => {
+                        
+                        return (
+                          <li key={item.path}>
+                            <a
+                              href={item.path}
+                              onClick={() => setMobileNavOpen(false)}
+                              className={`flex items-center gap-3 text-lg font-medium transition-colors duration-200 ${
+                                pathname === item.path 
+                                  ? "text-gray-900 border-l-4 border-gray-900 pl-4" 
+                                  : "text-gray-600 hover:text-gray-900 hover:border-l-4 hover:border-gray-300 pl-4"
+                              }`}
+                            >
+                              
+                              <span>{item.name}</span>
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                  
+                  {/* Galleries Section */}
+                  <li>
+                    <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Galleries</h3>
+                    <ul className="space-y-4">
+                      {galleryNavItems.map((item) => {
+                        
+                        return (
+                          <li key={item.path}>
+                            <a
+                              href={item.path}
+                              onClick={() => setMobileNavOpen(false)}
+                              className={`flex items-center gap-3 text-lg font-medium transition-colors duration-200 ${
+                                pathname === item.path 
+                                  ? "text-gray-900 border-l-4 border-gray-900 pl-4" 
+                                  : "text-gray-600 hover:text-gray-900 hover:border-l-4 hover:border-gray-300 pl-4"
+                              }`}
+                            >
+                              
+                              <span>{item.name}</span>
+                            </a>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
                 </ul>
               </nav>
             </div>

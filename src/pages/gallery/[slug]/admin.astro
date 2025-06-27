@@ -21,11 +21,15 @@ if (!adminSecret || adminSecret !== import.meta.env.ADMIN_SECRET) {
   return Astro.redirect("/");
 }
 
-console.log(Astro.params);
 const { slug } = Astro.params;
 if (!slug) {
   return Astro.redirect("/404");
 }
+
+const store = getStore('galleries');
+const homegallery = await store.get(`gallery/home`, { type: 'json' });
+const links: {description: string, link: string}[] = homegallery.layout.filter((tile: any) => tile.link);
+const pathname = Astro.url.pathname;
 
 // Get gallery data
 const galleriesStore = getStore("galleries");
@@ -123,18 +127,11 @@ const unusedImages = uploadsWithStatus
   .filter((upload) => !upload.isThumbnail && !upload.isUsed)
   .sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
 
-console.log(
-  "Unused images:",
-  unusedImages.map((u) => ({
-    key: u.key,
-    isThumbnail: u.isThumbnail,
-    isUsed: u.isUsed,
-  }))
-);
+
 ---
 
 <Layout title={`Admin - ${gallery.title}`} id="admin">
-  <Header client:load />
+  <Header client:load links={links} pathname={pathname} />
   <Hero title={`Admin - ${gallery.title}`} />
   <GalleryAdmin
     client:only="react"

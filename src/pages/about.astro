@@ -11,10 +11,13 @@ const store = getStore('galleries');
 const key = `gallery/about`;
 const gallery = await store.get(key, { type: 'json' });
 
+const homegallery = await store.get(`gallery/home`, { type: 'json' });
+const links: {description: string, link: string}[] = homegallery.layout.filter((tile: any) => tile.link);
+const pathname = Astro.url.pathname;
 ---
 
 <Layout title={gallery.title} id={gallery.slug}>
-  <Header client:load />
+  <Header client:load links={links} pathname={pathname} />
   <Hero title={gallery.title} />
   <Tiles gallery={gallery} class="responsive-grid" />
 </Layout>
