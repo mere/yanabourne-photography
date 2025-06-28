@@ -49,6 +49,7 @@ const SIZE_CONFIG = {
     radius: 100,
     fontSize: 14,
     strokeWidth: 10,
+    dotRadius: 5,
     overlaySize: 180,
     textArc: {
       startDeg: 165,
@@ -66,6 +67,7 @@ const LOGO_DOT_COLOR = "#EE0000";
 
 const Logo = ({ size = "S", fixed = false, noRotate = false }: LogoProps) => {
   const [rotation, setRotation] = useState(0);
+  const [shouldFadeOut, setShouldFadeOut] = useState(false);
   const targetRotation = useRef(0);
   const animationFrameId = useRef<number | undefined>(undefined);
 
@@ -101,6 +103,33 @@ const Logo = ({ size = "S", fixed = false, noRotate = false }: LogoProps) => {
     };
   }, []);
 
+  // Fade logic for fixed logos - fade out when only 20vh remaining
+  useEffect(() => {
+    if (!fixed) return;
+
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Check if there's only 20vh remaining
+      const remainingHeight = documentHeight - (scrollTop + viewportHeight);
+      const shouldFade = remainingHeight <= viewportHeight * 0.2; // 20vh
+      
+      setShouldFadeOut(shouldFade);
+    };
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Don't run initial calculation - let the logo stay visible on page load
+    // Only start checking after user scrolls
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [fixed]);
+
   return (
     <div className="relative">
       <a href="/">
@@ -115,10 +144,9 @@ const Logo = ({ size = "S", fixed = false, noRotate = false }: LogoProps) => {
             position: fixed ? "fixed" : "absolute",
             top: fixed?20:0,
             left: fixed?20:0,
-            transform: `rotate(${rotation}deg)`,
-            transition: "transform 0.05s ease-out",
+            transform: `rotate(${rotation}deg)`
           }}
-          className="z-9995 _mix-blend-difference"
+          className={`logo z-9995 _mix-blend-difference ${shouldFadeOut ? 'logo-fade-out' : ''}`}
         >
           <defs>
             <Arc

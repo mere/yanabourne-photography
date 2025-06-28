@@ -14,7 +14,15 @@ body {
   background-color: #FFFFFF;
 }
 
+/* Logo fade-out animation */
+.logo {
+  opacity: 1;
+  transition: opacity 400ms ease-out, transform 400ms ease-out;
+}
 
+.logo-fade-out {
+  opacity: 0;
+}
 
 /* Mobile Navigation */
 .mobile-nav-overlay {

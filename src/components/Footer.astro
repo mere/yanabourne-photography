@@ -23,12 +23,20 @@ const links: {description: string, link: string}[] = gallery.layout.filter((tile
         <div class="mb-4">
           <!-- SVG Logo -->
           <div class="flex items-center gap-2">
-            <div class="w-[120px] h-[120px]">
+            <div class="w-[120px] h-[120px] footer-logo">
               <Logo client:load noRotate />
             </div>
             <div>
-              <h1 class="text-lg  max-w-md text-black text-center whitespace-pre-line font-karla font-light cursor-default select-none"> YANA BOURNE
-                PHOTOGRAPHY </h1>
+              <h1 class="text-lg flex flex-col text-center max-w-md text-black whitespace-pre-line font-karla font-light cursor-default select-none">
+                <span class="flex items-center">
+                  <!-- <span class="inline-block ml-2 w-[8px] h-[8px] rounded-full bg-[#ee0000] mr-1"></span>  -->
+                  <span>YANA BOURNE</span>
+                </span>
+                <span class="">PHOTOGRAPHY</span>
+                
+              
+                
+              </h1>
             </div>
           </div>
         </div>
@@ -53,7 +61,7 @@ const links: {description: string, link: string}[] = gallery.layout.filter((tile
           <a href="/book-me" class={`text-sm text-gray-600 hover:text-gray-900 transition-colors block ${url === "/book-me" ? "text-gray-900 font-bold" : ""}`}>
             Book Me
           </a>
-          <a href="https://yanabourne.com" class={`font-bold flex items-center mt-4 text-sm text-gray-600 hover:text-gray-900 transition-colors ${url === "/book-me" ? "text-gray-900 font-bold" : ""}`}>
+          <a href="https://yanabourne.com" class={`font-bold flex items-center mt-4 text-sm text-gray-600 hover:text-gray-900 transition-colors `}>
             Dentistry <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block ml-1" fill="none" viewBox="0 0 24 24" stroke="black"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           </a>
         </div>
@@ -92,14 +100,14 @@ const links: {description: string, link: string}[] = gallery.layout.filter((tile
 
     <!-- Bottom section with copyright and edit link -->
     <div class="flex justify-center items-center pt-8 border-t border-gray-200">
-      <p class="text-xs md:text-sm text-gray-400 p-0 m-0">
-        &copy; {currentYear} Yana Bourne Photography. All rights reserved.
+      <p class="text-xs md:text-sm text-gray-400 p-0 m-0 flex items-center justify-center ">
+        &copy; {currentYear} <span class="inline-block ml-2 w-[6px] h-[6px] rounded-full bg-[#ee0000] mr-1"></span> <span class="text-black mr-2">Yana Bourne Photography.</span> All rights reserved.
       </p>
 
       <div class="flex items-center gap-4">
         <a
           href={`/gallery/${id || "home"}/edit`}
-          class="text-gray-400/20 hover:text-gray-500/10"
+          class="opacity-0"
           title="Edit Gallery"
         >
           <svg

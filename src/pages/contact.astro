@@ -2,10 +2,11 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Header from '../react/Header';
-import {ContactForm} from "../react/contact";
+import {ContactForm} from "../react/ContactForm";
 import { getStore } from "~/utils/blob-store";
 
 export const prerender = true;
+
 const store = getStore('galleries');
 const homegallery = await store.get(`gallery/home`, { type: 'json' });
 const links: {description: string, link: string}[] = homegallery.layout.filter((tile: any) => tile.link);
