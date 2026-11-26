@@ -1,0 +1,32 @@
+{
+  "slug": "about",
+  "title": "About",
+  "description": "",
+  "coverImage": "",
+  "layout": [
+    {
+      "id": "tile-1750945536794-uotmeq5al",
+      "imageUrl": "about/1750945534581-0bmamgzpiysa-yanabourne-16.jpeg",
+      "altText": "yanabourne-16.jpeg",
+      "title": "",
+      "description": "",
+      "link": "",
+      "x": 0,
+      "y": 0,
+      "w": 6,
+      "h": 6
+    },
+    {
+      "id": "tile-1749052795351",
+      "imageUrl": "",
+      "altText": "",
+      "title": "",
+      "description": "<div><div class=\"p-4\">\n<h3>Hello, I’m Yana Bourne, a portrait and lifestyle photographer based in London.</h3><p>My work is rooted in a cinematic, natural, and effortlessly relaxed style. Whether it’s a portrait session, a family shoot, or a special event, I strive to capture moments that feel intimate, honest, and timeless.</p><p>To me, photography is an act of courage, a way to uncover the beauty that lives beneath the surface. I take time to connect with each person I photograph, to peel back the layers and reveal something raw, radiant, and real.</p><p>I love when people come alive in front of the camera - playful, sensual, wild, and free. Each shoot is a thoughtfully curated experience, often set to music, sometimes with a glass of champagne, and always with room for spontaneity. It’s often the unplanned moments that hold the most magic.\n<div class=\"block text-blue-500 transition duration-150 ease-in-out font-the-nautigal no-underline text-4xl\" href=\"/\">Yana Bourne</div>\n</p>\n</div></div>",
+      "link": "",
+      "x": 6,
+      "y": 0,
+      "w": 6,
+      "h": 7
+    }
+  ]
+}

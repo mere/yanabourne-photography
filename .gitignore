@@ -24,4 +24,3 @@ pnpm-debug.log*
 .idea/
 
 .env.local
-.netlify/

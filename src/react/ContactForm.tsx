@@ -41,7 +41,7 @@ export function ContactForm() {
                   name="contact"
                   method="POST"
                   className="w-full"
-                  data-netlify="true"
+                  action="#"
                 >
                   <div className="flex flex-wrap -mx-3 mb-4">
                     <div className="w-full px-3">

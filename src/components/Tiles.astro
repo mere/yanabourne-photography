@@ -1,52 +1,26 @@
 ---
 import Tile from "./Tile.astro";
-import convex from "../lib/convex";
-import { api } from "../../convex/_generated/api";
-import type { Doc } from "convex/_generated/dataModel";
-import { getStore } from "~/utils/blob-store";
-import type { ListResult } from "~/types/upload";
+import type { GalleryData } from "~/lib/galleries";
 
 interface Props {
-  gallery: Doc<"galleries">;
+  gallery: GalleryData;
   class?: string;
 }
 
 const { gallery, class: className } = Astro.props;
-
-// Get all uploaded images for this gallery
-const uploadsStore = getStore("file-uploads");
-const uploads = await uploadsStore.list({
-  prefix: `${gallery.slug}/`,
-}) as ListResult;
-
-// Create a map of image URLs to their thumbnail URLs
-const thumbMap = new Map<string, string>();
-for (const blob of uploads.blobs) {
-  if (blob.key.includes('/thumb/')) {
-    // Extract the original image name from the thumbnail path
-    const originalName = blob.key.split('/thumb/')[1];
-    const originalKey = `${gallery.slug}/${originalName}`;
-    thumbMap.set(originalKey, blob.key);
-  }
-}
-
 ---
 
 <div class="tiles-container">
-  <!-- <h1 class="gallery-title">{gallery.title}</h1> -->
-  <!-- {gallery.description && <p class="gallery-description">{gallery.description}</p>} -->
   <div class={`tiles-grid ${className}`}>
     {
       gallery.layout
-      .sort((a: { x: number; y: number }, b: { x: number; y: number }) => {
-          // Sort by y coordinate first
+      .sort((a, b) => {
           if (a.y !== b.y) {
             return a.y - b.y;
           }
-          // If y is the same, sort by x coordinate
           return a.x - b.x;
         })
-      .map((tile: { id: string; imageUrl: string; x: number; y: number; w: number; h: number; description?: string; },i) => (
+      .map((tile, i) => (
         <div
           class={`tile-wrapper ${i>0 ? 'animate-start' : ''}`}
           style={`
@@ -54,10 +28,7 @@ for (const blob of uploads.blobs) {
             grid-row: ${tile.y + 1} / span ${tile.h};
           `}
         >
-          <Tile
-            tile={tile}
-            thumbUrl={tile.imageUrl ? thumbMap.get(tile.imageUrl) : undefined}
-          />
+          <Tile tile={tile} />
         </div>
       ))
     }
@@ -71,14 +42,6 @@ for (const blob of uploads.blobs) {
     @apply w-full px-0 min-h-[62vh];
   }
 
-  .gallery-title {
-    @apply text-3xl font-bold mb-2;
-  }
-
-  .gallery-description {
-    @apply text-gray-600 mb-8;
-  }
-
   .tiles-grid {
     display: grid;
     grid-template-columns: repeat(12, calc((100vw) / 12));
@@ -89,7 +52,6 @@ for (const blob of uploads.blobs) {
       @apply flex flex-col;
     }
   }
-  
 
   .tile-wrapper {
     @apply w-full h-full pb-0.5 md:p-0.5 relative overflow-hidden;
@@ -108,7 +70,6 @@ for (const blob of uploads.blobs) {
 </style>
 
 <script>
-  // Define the Intersection Observer
   const observer = new IntersectionObserver(
     (entries, observer) => {
       entries.forEach((entry) => {
@@ -120,7 +81,6 @@ for (const blob of uploads.blobs) {
           if (!img || img.complete) {
             entry.target.classList.add("animate");
           } else {
-            // Otherwise wait for load
             img.addEventListener("load", () => {
               entry.target.classList.add("animate");
             });
@@ -135,7 +95,6 @@ for (const blob of uploads.blobs) {
     }
   );
 
-  // Observe elements with the `util-image` class
   document.querySelectorAll(".tile-wrapper").forEach((target) => {
     observer.observe(target);
   });

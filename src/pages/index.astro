@@ -3,15 +3,10 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Header from '../react/Header';
 import Tiles from "../components/Tiles.astro";
-import { getStore } from "~/utils/blob-store";
+import { getGallery, getHomeNavLinks } from "~/lib/galleries";
 
-export const prerender = false;
-
-const store = getStore('galleries');
-const key = `gallery/home`;
-const gallery = await store.get(key, { type: 'json' });
-
-const links: {description: string, link: string}[] = gallery.layout.filter((tile: any) => tile.link);
+const gallery = getGallery('home')!;
+const links = getHomeNavLinks();
 const pathname = Astro.url.pathname;
 ---
 
