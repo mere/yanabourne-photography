@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../react/Header";
+import Hero from "../components/Hero.astro";
+import { getHomeNavLinks } from "~/lib/galleries";
+
+const links = getHomeNavLinks();
+---
+
+<Layout title="Page not found" id="404">
+  <Header client:load links={links} pathname="/404" />
+  <Hero title="Page not found" />
+  <section class="font-karla px-6 py-16 text-center max-w-xl mx-auto">
+    <p class="text-gray-600 mb-6">
+      That page does not exist. Head back to the homepage or pick a gallery from the menu.
+    </p>
+    <a
+      href="/"
+      class="inline-block p-2 rounded-sm text-black bg-white border border-black hover:bg-gray-100"
+    >
+      Home
+    </a>
+  </section>
+</Layout>

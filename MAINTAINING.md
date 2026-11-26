@@ -109,11 +109,13 @@ Copy `deploy/Caddyfile` and `deploy/legacy-image-redirects.caddy` to the server�
 - `/photos/*` → `/srv/yanabourne/photos/web` with long cache headers
 - Old `/api/get-raw-image?key=…` URLs redirect to the largest web variant
 
-Regenerate redirects after bulk URL changes:
+Regenerate redirects after bulk URL changes (place backup at `deploy/url-mapping.json` or pass a path):
 
 ```bash
 npm run generate-redirects
 ```
+
+Redirects use a Caddy `map` on `{query.key}` (query matchers — path-only `redir` does not work). Each target uses the **largest** `w480/w960/w1600/w2400` variant that exists for that image’s intrinsic width in `photo-dimensions.json`. Convex URLs, favicons, forms stubs, and other non-blob keys are omitted.
 
 ## Contact form
 

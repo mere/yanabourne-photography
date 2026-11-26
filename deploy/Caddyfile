@@ -10,13 +10,25 @@ www.yanabourne.com {
 yanabourne.com {
 	root * /srv/yanabourne/main
 	encode gzip zstd
-	file_server
+
+	handle {
+		try_files {path} {path}/ {path}/index.html {path}.html =404
+		file_server
+	}
+
+	handle_errors {
+		@404 expression {http.error.status_code} == 404
+		handle @404 {
+			rewrite * /404.html
+			file_server
+		}
+	}
 }
 
 photography.yanabourne.com {
 	encode gzip zstd
 
-	# Legacy Netlify image API → static /photos variants
+	# Legacy Netlify image API → static /photos variants (query.key map)
 	import legacy-image-redirects.caddy
 
 	handle_path /photos/* {
@@ -27,8 +39,17 @@ photography.yanabourne.com {
 
 	handle {
 		root * /srv/yanabourne/photography
-		try_files {path} {path}/ /index.html
+		try_files {path} {path}/index.html =404
 		header Cache-Control "public, max-age=3600"
 		file_server
+	}
+
+	handle_errors {
+		@404 expression {http.error.status_code} == 404
+		handle @404 {
+			root * /srv/yanabourne/photography
+			rewrite * /404.html
+			file_server
+		}
 	}
 }
