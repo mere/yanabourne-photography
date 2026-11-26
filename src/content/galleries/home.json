@@ -1,0 +1,152 @@
+{
+  "slug": "home",
+  "title": "Yana Bourne Photography",
+  "description": "",
+  "coverImage": "",
+  "layout": [
+    {
+      "id": "tile-1749033477298",
+      "imageUrl": "home/1749304839237-1okp2q9lhbo-l1001893.jpg",
+      "altText": "Saffron and Spirulina",
+      "title": "",
+      "description": "Saffron and Spirulina",
+      "link": "/gallery/saffron-and-spirulina",
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 5
+    },
+    {
+      "id": "tile-1749032380882",
+      "imageUrl": "home/1749032854142-u9122cactxi-IMG_6245.JPG",
+      "altText": "Portraits and Lifestyle",
+      "title": "",
+      "description": "Portraits and Lifestyle",
+      "link": "/gallery/portraits-and-lifestyle",
+      "x": 4,
+      "y": 0,
+      "w": 8,
+      "h": 5
+    },
+    {
+      "id": "tile-1749035724362",
+      "imageUrl": "home/1749304921640-jxgy25pwith-img-0116.jpg",
+      "altText": "Business Portraits",
+      "title": "",
+      "description": "Business Portraits",
+      "link": "/gallery/business-portraits",
+      "x": 0,
+      "y": 5,
+      "w": 7,
+      "h": 4
+    },
+    {
+      "id": "tile-1749034546765",
+      "imageUrl": "home/1749034579941-ii1kl17rrel-578AF70B-DBFC-4429-9BD4-4D9B08300140.JPG",
+      "altText": "Black and White",
+      "title": "",
+      "description": "Black and White",
+      "link": "/gallery/black-and-white",
+      "x": 7,
+      "y": 5,
+      "w": 5,
+      "h": 4
+    },
+    {
+      "id": "tile-1749036770495",
+      "imageUrl": "home/1749306060652-bc5su9lbzs9-8aa99109-cfda-4db4-ba95-f10562b104d9.jpg",
+      "altText": "Femininity",
+      "title": "",
+      "description": "Femininity",
+      "link": "/gallery/femininity",
+      "x": 0,
+      "y": 9,
+      "w": 4,
+      "h": 6
+    },
+    {
+      "id": "tile-1749034898380",
+      "imageUrl": "home/1749034931488-fazrm03nczs-IMG_0127.JPG",
+      "altText": "Maternity",
+      "title": "",
+      "description": "Maternity",
+      "link": "/gallery/maternity",
+      "x": 4,
+      "y": 9,
+      "w": 4,
+      "h": 3
+    },
+    {
+      "id": "tile-1749032122041",
+      "imageUrl": "home/1749306308734-oqa3qox3q4m-dscf7417.jpg",
+      "altText": "Tales",
+      "title": "",
+      "description": "Tales",
+      "link": "/gallery/tales",
+      "x": 8,
+      "y": 9,
+      "w": 4,
+      "h": 7
+    },
+    {
+      "id": "tile-1750846390625",
+      "imageUrl": "home/1750847563697-sde7twloa08-11df0f3d-cd15-42fc-bbf5-0b245904dddd-21376-00000a78c52a5957.jpeg",
+      "altText": "Love Stories ",
+      "title": "",
+      "description": "Love Stories ",
+      "link": "/gallery/love-stories",
+      "x": 4,
+      "y": 12,
+      "w": 4,
+      "h": 7
+    },
+    {
+      "id": "tile-1749029582886",
+      "imageUrl": "home/1750869670709-syxj5ks9fa-dscf7807.jpeg",
+      "altText": "Events",
+      "title": "",
+      "description": "Events",
+      "link": "/gallery/events",
+      "x": 0,
+      "y": 15,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "id": "tile-1749050330945",
+      "imageUrl": "home/1750846284965-qwbj0a3b0yo-do01040051.jpeg",
+      "altText": "Property",
+      "title": "",
+      "description": "Property",
+      "link": "/gallery/property",
+      "x": 8,
+      "y": 16,
+      "w": 4,
+      "h": 7
+    },
+    {
+      "id": "tile-1749051275810",
+      "imageUrl": "home/1750942943895-bhp7os6ynab-img-8581.jpeg",
+      "altText": "Colour Play",
+      "title": "",
+      "description": "Colour Play",
+      "link": "/gallery/colour-play",
+      "x": 0,
+      "y": 19,
+      "w": 4,
+      "h": 4
+    },
+    {
+      "id": "tile-1749051967958",
+      "imageUrl": "home/1750942762646-0glalhx7l2o-000123980004.jpeg",
+      "altText": "Film",
+      "title": "",
+      "description": "Film",
+      "link": "/gallery/film",
+      "x": 4,
+      "y": 19,
+      "w": 4,
+      "h": 4
+    }
+  ]
+}

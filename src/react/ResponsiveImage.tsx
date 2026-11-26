@@ -1,38 +1,37 @@
-import { useState } from 'react';
+import {
+  defaultPhotoSrc,
+  photoDimensions,
+  photoSrcSet,
+  tileSizes,
+} from '../lib/photos';
 
 interface Props {
   id: string;
   w: number;
   h: number;
-  site: string;
   alt: string;
-  thumbUrl?: string;
 }
 
-export function ResponsiveImage({ id, w, h, site, alt, thumbUrl }: Props) {
-  const [thumbError, setThumbError] = useState(false);
+export function ResponsiveImage({ id, w, alt }: Props) {
+  if (!id) return null;
 
-  const src = thumbUrl && !thumbError
-    ? `${site}/api/get-raw-image?key=${encodeURIComponent(thumbUrl)}`
-    : (() => {
-        const originalSrc = encodeURIComponent(`${site}/api/get-raw-image?key=${id}`);
-        return `${site}/.netlify/images?w=${w}&h=${h}&fit=contain&url=${originalSrc}`;
-      })();
+  const dims = photoDimensions(id);
+  const src = defaultPhotoSrc(id, 480);
+  const srcSet = photoSrcSet(id);
 
   return (
     <div className="relative w-full h-full">
       <img
         src={src}
+        srcSet={srcSet || undefined}
+        sizes={tileSizes(w)}
+        width={dims?.width}
+        height={dims?.height}
         alt={alt}
-        className={`w-full h-full object-cover`}
-        onError={() => {
-          if (thumbUrl) {
-            setThumbError(true);
-          }
-        }}
+        className="util-image w-full h-full object-cover"
+        loading="lazy"
+        decoding="async"
       />
-      
     </div>
   );
 }
-

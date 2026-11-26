@@ -1,27 +1,18 @@
 ---
 import Logo from "~/react/Logo";
-import { getStore } from "~/utils/blob-store";
+import { getHomeNavLinks } from "~/lib/galleries";
 
 const currentYear = new Date().getFullYear();
 const { id } = Astro.props;
 const url = Astro.url.pathname;
-
-const store = getStore('galleries');
-const key = `gallery/home`;
-const gallery = await store.get(key, { type: 'json' });
-
-const links: {description: string, link: string}[] = gallery.layout.filter((tile: any) => tile.link);
-
+const links = getHomeNavLinks();
 ---
 
 <footer class="font-karla border-t border-gray-200 mt-12 py-12 w-full bg-gray-100">
   <div class=" mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Main footer content -->
     <div class="grid grid-cols-6 gap-8 mb-8">
-      <!-- Logo section -->
       <div class="col-span-6 md:col-span-2 flex flex-col items-start">
         <div class="mb-4">
-          <!-- SVG Logo -->
           <div class="flex items-center gap-2">
             <div class="w-[120px] h-[120px] footer-logo">
               <Logo client:load noRotate />
@@ -29,13 +20,9 @@ const links: {description: string, link: string}[] = gallery.layout.filter((tile
             <div>
               <h1 class="text-lg flex flex-col text-center max-w-md text-black whitespace-pre-line font-karla font-light cursor-default select-none">
                 <span class="flex items-center">
-                  <!-- <span class="inline-block ml-2 w-[8px] h-[8px] rounded-full bg-[#ee0000] mr-1"></span>  -->
                   <span>YANA BOURNE</span>
                 </span>
                 <span class="">PHOTOGRAPHY</span>
-                
-              
-                
               </h1>
             </div>
           </div>
@@ -45,7 +32,6 @@ const links: {description: string, link: string}[] = gallery.layout.filter((tile
         </p>
       </div>
 
-      <!-- Quick links section -->
       <div class="col-span-2 md:col-span-2 flex flex-col items-start">
         <h4 class="text-lg font-semibold text-gray-900 mb-4">Quick Links</h4>
         <div class="space-y-2">
@@ -67,7 +53,6 @@ const links: {description: string, link: string}[] = gallery.layout.filter((tile
         </div>
       </div>
 
-      <!-- Gallery links section - first column -->
       <div class="col-span-2 md:col-span-1 flex flex-col items-start">
         <h4 class="text-lg font-semibold text-gray-900 mb-4">Galleries</h4>
         <div class="space-y-2">
@@ -82,7 +67,6 @@ const links: {description: string, link: string}[] = gallery.layout.filter((tile
         </div>
       </div>
 
-      <!-- Gallery links section - second column -->
       <div class="col-span-2 md:col-span-1 flex flex-col items-start">
         <h4 class="text-lg font-semibold text-gray-900 mb-4 ">&nbsp;</h4>
         <div class="space-y-2">
@@ -98,31 +82,10 @@ const links: {description: string, link: string}[] = gallery.layout.filter((tile
       </div>
     </div>
 
-    <!-- Bottom section with copyright and edit link -->
     <div class="flex justify-center items-center pt-8 border-t border-gray-200">
       <p class="text-xs md:text-sm text-gray-400 p-0 m-0 flex items-center justify-center ">
         &copy; {currentYear} <span class="inline-block ml-2 w-[6px] h-[6px] rounded-full bg-[#ee0000] mr-1"></span> <span class="text-black mr-2">Yana Bourne Photography.</span> All rights reserved.
       </p>
-
-      <div class="flex items-center gap-4">
-        <a
-          href={`/gallery/${id || "home"}/edit`}
-          class="opacity-0"
-          title="Edit Gallery"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
-            ></path>
-          </svg>
-        </a>
-      </div>
     </div>
   </div>
 </footer>
-

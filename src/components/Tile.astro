@@ -1,24 +1,14 @@
 ---
 import { ResponsiveImage } from '~/react/ResponsiveImage';
 import TypographyWrapper from '../react/TypographyWrapper';
+import type { GalleryTile } from '~/lib/galleries';
 
 interface Props {
-  tile: {
-    id: string,
-    imageUrl: string,
-    altText: string,
-    description: string,
-    link: string,
-    x: number,
-    y: number,
-    w: number,
-    h: number
-  }
+  tile: GalleryTile;
   className?: string;
-  thumbUrl?: string;
 }
 
-const { tile, className='', thumbUrl } = Astro.props;
+const { tile, className='' } = Astro.props;
 
 const Wrapper = tile.link ? "a" : "div";
 const wrapperProps = tile.link ? { href: tile.link } : {};
@@ -32,11 +22,9 @@ const wrapperProps = tile.link ? { href: tile.link } : {};
   {tile.imageUrl && (
     <ResponsiveImage
       id={tile.imageUrl}
-      w={tile.w * 300}
-      h={tile.h * 300}
-      site={import.meta.env.PUBLIC_URL}
+      w={tile.w}
+      h={tile.h}
       alt={tile.altText}
-      thumbUrl={thumbUrl}
     />
   )}
   {tile.imageUrl && tile.description && (

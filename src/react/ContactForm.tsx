@@ -1,15 +1,18 @@
 "use client";
 
 import Signature from "./signature";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FormEvent } from "react";
+
+const CONTACT_SITE = "photography.yanabourne.com";
 
 export function ContactForm() {
   const [status, setStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [prefilledMessage, setPrefilledMessage] = useState<string>("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [prefilledMessage, setPrefilledMessage] = useState("");
+  const [website, setWebsite] = useState("");
 
   useEffect(() => {
-    // Get the message parameter from the URL
     const urlParams = new URLSearchParams(window.location.search);
     const message = urlParams.get("message");
     if (message) {
@@ -17,12 +20,58 @@ export function ContactForm() {
     }
   }, []);
 
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStatus("pending");
+
+    const body: Record<string, string> = {
+      site: CONTACT_SITE,
+      name,
+      email,
+      message: prefilledMessage,
+      page: window.location.pathname,
+      website,
+    };
+
+    const phoneInput = e.currentTarget.elements.namedItem(
+      "phone",
+    ) as HTMLInputElement | null;
+    if (phoneInput?.value) {
+      body.phone = phoneInput.value;
+    }
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      let ok = false;
+      if (res.status === 200) {
+        try {
+          const data = (await res.json()) as { ok?: boolean };
+          ok = data.ok === true;
+        } catch {
+          ok = false;
+        }
+      }
+
+      if (ok) {
+        setStatus("ok");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  }
+
   return (
     <section className="bg-slate-900" id="contact">
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
         <div className="py-12 md:py-20">
           <div className="relative max-w-5xl mx-auto">
-            {/* Grid container */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
               {status === "ok" ? (
                 <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
@@ -37,12 +86,23 @@ export function ContactForm() {
                   </p>
                 </div>
               ) : (
-                <form
-                  name="contact"
-                  method="POST"
-                  className="w-full"
-                  data-netlify="true"
-                >
+                <form className="w-full" onSubmit={handleSubmit}>
+                  <div
+                    className="absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0"
+                    aria-hidden="true"
+                    style={{ clip: "rect(0, 0, 0, 0)" }}
+                  >
+                    <label htmlFor="website">Website</label>
+                    <input
+                      id="website"
+                      name="website"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                    />
+                  </div>
                   <div className="flex flex-wrap -mx-3 mb-4">
                     <div className="w-full px-3">
                       <label
@@ -58,7 +118,9 @@ export function ContactForm() {
                         type="text"
                         className="form-input w-full bg-slate-800 border border-slate-700 focus:border-slate-600 rounded-sm px-4 py-3 text-white placeholder-slate-500"
                         placeholder="Name"
-                        required={true}
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                       />
                     </div>
                   </div>
@@ -76,7 +138,9 @@ export function ContactForm() {
                         type="email"
                         className="form-input w-full bg-slate-800 border border-slate-700 focus:border-slate-600 rounded-sm px-4 py-3 text-white placeholder-slate-500"
                         placeholder="Email"
-                        required={true}
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
                   </div>
@@ -95,11 +159,11 @@ export function ContactForm() {
                         rows={4}
                         className="form-textarea w-full bg-slate-800 border border-slate-700 focus:border-slate-600 rounded-sm px-4 py-3 text-white placeholder-slate-500"
                         placeholder="Message"
-                        required={true}
+                        required
                         data-sb-field-path="form.message.placeholder"
                         value={prefilledMessage}
                         onChange={(e) => setPrefilledMessage(e.target.value)}
-                      ></textarea>
+                      />
                     </div>
                   </div>
                   <div className="flex flex-wrap -mx-3 mt-6">
@@ -125,7 +189,6 @@ export function ContactForm() {
                 </form>
               )}
 
-              {/* Text content */}
               <div>
                 <h2
                   className="text-3xl flex text-slate-100 mb-4 relative"
