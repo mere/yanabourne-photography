@@ -37,6 +37,10 @@ photography.yanabourne.com {
 		file_server
 	}
 
+	handle /api/contact {
+		reverse_proxy 127.0.0.1:8787
+	}
+
 	handle {
 		root * /srv/yanabourne/photography
 		try_files {path} {path}/index.html =404

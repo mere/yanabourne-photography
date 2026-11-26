@@ -119,4 +119,4 @@ Redirects use a Caddy `map` on `{query.key}` (query matchers — path-only `redi
 
 ## Contact form
 
-The contact page is static HTML. Netlify Forms is no longer used. Wire `ContactForm` to your preferred handler (e.g. Formspree, a small API on the main site, or `mailto:`) before expecting submissions in production.
+`ContactForm` POSTs JSON to same-origin `/api/contact`. Caddy proxies that path to `127.0.0.1:8787` (contact handler service, not in this repo). The service must respond with HTTP 200 and `{"ok":true}` on success.
